@@ -1,0 +1,99 @@
+{
+  "name": "synapsegrid",
+  "version": "1.0.0",
+  "description": "SynapseGrid - Advanced collaborative development environment with multi-language compiler, AI assistant, and host control",
+  "main": "dist/main/main.js",
+  "homepage": "https://github.com/DeepxkJadhav/SYNAPSE-GRID",
+  "author": {
+    "name": "SynapseGrid Team",
+    "email": "team@synapsegrid.dev"
+  },
+  "license": "MIT",
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @synapse/backend\" \"npm run dev -w @synapse/frontend\" \"electron .\"",
+    "build": "npm run build -w @synapse/backend && npm run build -w @synapse/frontend",
+    "electron-dev": "electron .",
+    "electron-build": "npm run build && electron-builder --win --publish never",
+    "electron-build-release": "npm run build && electron-builder --win -p always",
+    "dist": "npm run build && electron-builder --win msi nsis",
+    "pack": "electron-builder --dir",
+    "prepack": "npm run build",
+    "predist": "npm run build",
+    "release": "npm run dist && node scripts/github-release.js",
+    "test": "npm run test -w @synapse/backend && npm run test -w @synapse/frontend",
+    "lint": "npm run lint -w @synapse/backend && npm run lint -w @synapse/frontend",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules dist"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4",
+    "electron-dev-tools": "^1.0.0",
+    "typescript": "^5.3.0"
+  },
+  "workspaces": [
+    "packages/frontend",
+    "packages/backend",
+    "packages/shared"
+  ],
+  "build": {
+    "appId": "com.synapsegrid.app",
+    "productName": "SynapseGrid",
+    "files": [
+      "dist/main/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "dist/main/main.js"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "msi",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "certificateFile": null,
+      "certificatePassword": null,
+      "signingHashAlgorithms": [
+        "sha256"
+      ],
+      "artifactName": "SynapseGrid-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SynapseGrid"
+    },
+    "msi": {
+      "installerIcon": "assets/icon.ico",
+      "handoverUrl": "https://github.com/DeepxkJadhav/SYNAPSE-GRID"
+    },
+    "portable": {
+      "artifactName": "SynapseGrid-${version}-portable.exe"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "DeepxkJadhav",
+      "repo": "SYNAPSE-GRID",
+      "releaseType": "draft"
+    }
+  }
+}

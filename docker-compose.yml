@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: collab-postgres
+    environment:
+      POSTGRES_USER: collab_user
+      POSTGRES_PASSWORD: collab_password
+      POSTGRES_DB: collab_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U collab_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - collab-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: collab-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - collab-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./packages/backend
+      dockerfile: Dockerfile
+    container_name: collab-backend
+    environment:
+      NODE_ENV: development
+      BACKEND_PORT: 5000
+      DATABASE_URL: postgresql://collab_user:collab_password@postgres:5432/collab_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-secret-key-change-this-in-production
+      JWT_REFRESH_SECRET: your-refresh-secret-key-change-this-in-production
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./packages/backend/src:/app/src
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - collab-network
+    command: npm run dev
+
+  # Frontend App
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile
+    container_name: collab-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5000
+      NEXT_PUBLIC_WS_URL: ws://localhost:5000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./packages/frontend/src:/app/src
+    networks:
+      - collab-network
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  collab-network:
+    driver: bridge
