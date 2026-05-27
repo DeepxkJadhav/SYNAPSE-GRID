@@ -1,0 +1,104 @@
+name: Build and Release SynapseGrid
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build backend
+        run: npm run build -w @synapse/backend
+
+      - name: Build frontend
+        run: npm run build -w @synapse/frontend
+
+      - name: Build Windows executable
+        run: npm run dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: synapsegrid-windows
+          path: dist/SynapseGrid-*.exe
+          retention-days: 30
+
+      - name: Get release files
+        id: get-files
+        run: |
+          $files = Get-ChildItem -Path dist -Filter "*.exe" | Select-Object -ExpandProperty FullName
+          foreach ($file in $files) {
+            Write-Output "artifact=$file" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Create Release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref || format('v{0}', github.event.inputs.version) }}
+          release_name: SynapseGrid ${{ github.ref || format('Release {0}', github.event.inputs.version) }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./dist/SynapseGrid-1.0.0-x64.exe
+          asset_name: SynapseGrid-1.0.0-x64.exe
+          asset_content_type: application/octet-stream
+
+      - name: Upload MSI installer
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./dist/SynapseGrid-1.0.0-x64.msi
+          asset_name: SynapseGrid-1.0.0-x64.msi
+          asset_content_type: application/x-msi
+
+      - name: Upload Portable version
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./dist/SynapseGrid-1.0.0-portable.exe
+          asset_name: SynapseGrid-1.0.0-portable.exe
+          asset_content_type: application/octet-stream
+
+      - name: Publish release
+        run: |
+          Write-Output "✅ Release published successfully!"
+          Write-Output "📦 Executables uploaded:"
+          Get-ChildItem -Path dist -Filter "*.exe"
+          Get-ChildItem -Path dist -Filter "*.msi"
