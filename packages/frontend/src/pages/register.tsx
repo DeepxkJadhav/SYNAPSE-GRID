@@ -42,66 +42,82 @@ export default function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
+    <div className="flex items-center justify-center min-h-screen bg-[#040711] relative overflow-hidden px-4">
+      {/* Decorative background glow */}
+      <div className="absolute top-[20%] left-[20%] w-[400px] h-[400px] rounded-full bg-indigo-900/10 blur-[100px] pointer-events-none"></div>
+
+      <div className="w-full max-w-md p-8 glass-card rounded-2xl relative z-10">
         
+        {/* Logo/Brand Icon */}
+        <div className="flex flex-col items-center mb-8">
+          <span className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-indigo-600/30 mb-4">
+            S
+          </span>
+          <h2 className="text-2xl font-bold tracking-tight text-white font-sans">
+            SYNAPSE<span className="text-indigo-400 font-light">GRID</span>
+          </h2>
+          <p className="text-sm text-slate-400 mt-1">Register new operator terminal identity</p>
+        </div>
+
         {error && (
-          <div className="p-3 mb-4 text-sm text-red-600 bg-red-100 rounded">
-            {error}
+          <div className="p-4 mb-5 text-sm text-rose-400 bg-rose-950/20 border border-rose-500/20 rounded-xl">
+            ⚠️ {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Operator Username</label>
             <input
               type="text"
               name="username"
+              placeholder="e.g. neuro_agent"
               value={formData.username}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              className="w-full px-4 py-3 bg-slate-950/50 border border-indigo-950/40 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-950/30 transition-all font-sans text-sm"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Email address</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="operator@synapsegrid.net"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 bg-slate-950/50 border border-indigo-950/40 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-950/30 transition-all font-sans text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Secure password</label>
             <input
               type="password"
               name="password"
+              placeholder="••••••••••••"
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+              className="w-full px-4 py-3 bg-slate-950/50 border border-indigo-950/40 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-950/30 transition-all font-sans text-sm"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-2 text-white bg-primary rounded-md hover:bg-blue-600 disabled:bg-gray-400"
+            className="w-full px-4 py-3 text-white bg-indigo-600 rounded-xl font-bold hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-500 transition-all shadow-lg shadow-indigo-600/20 hover:scale-[1.01]"
           >
-            {loading ? 'Creating account...' : 'Sign Up'}
+            {loading ? 'Registering Operator...' : 'Register Identity'}
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-gray-600">
+        <p className="mt-6 text-sm text-slate-400 text-center">
           Already have an account?{' '}
-          <Link href="/login" className="text-primary hover:underline">
-            Log in
+          <Link href="/login" className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+            Authenticate
           </Link>
         </p>
       </div>
