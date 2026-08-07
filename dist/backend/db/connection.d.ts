@@ -1,5 +1,5 @@
-import { PoolClient } from 'pg';
-declare const pool: any;
+import { Pool, PoolClient } from 'pg';
+declare const pool: Pool;
 export declare const initializeDatabase: () => Promise<void>;
 export declare const query: (text: string, params?: unknown[]) => Promise<any>;
 export declare const getClient: () => Promise<PoolClient>;

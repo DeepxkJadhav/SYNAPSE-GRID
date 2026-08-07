@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const connection_1 = require("../db/connection");
 const auth_1 = require("../middleware/auth");
-const shared_1 = require("@collab/shared");
+const shared_1 = require("@synapse/shared");
 const crypto_1 = __importDefault(require("crypto"));
 const router = (0, express_1.Router)();
 // Generate random invite code
@@ -104,7 +104,7 @@ router.get('/', auth_1.authMiddleware, async (req, res) => {
        JOIN session_users su ON s.id = su.session_id
        WHERE su.user_id = $1 AND s.is_active = TRUE
        ORDER BY s.updated_at DESC`, [req.userId]);
-        const sessions = result.rows.map(row => ({
+        const sessions = result.rows.map((row) => ({
             id: row.id,
             ownerId: row.owner_id,
             name: row.name,
@@ -151,7 +151,7 @@ router.get('/:sessionId', auth_1.authMiddleware, async (req, res) => {
        FROM session_users su
        JOIN users u ON su.user_id = u.id
        WHERE su.session_id = $1`, [sessionId]);
-        const members = membersResult.rows.map(row => ({
+        const members = membersResult.rows.map((row) => ({
             id: row.id,
             username: row.username,
             email: row.email,

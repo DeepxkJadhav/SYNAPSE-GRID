@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Session, SessionMember } from '@collab/shared';
+import { Session, SessionMember } from '@synapse/shared';
 
 export interface SessionStore {
   currentSession: Session | null;

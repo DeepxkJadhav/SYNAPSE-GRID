@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorHandler = void 0;
-const shared_1 = require("@collab/shared");
+const shared_1 = require("@synapse/shared");
 const errorHandler = (err, req, res, next) => {
     console.error('Error:', err);
     if (err instanceof shared_1.AppError) {

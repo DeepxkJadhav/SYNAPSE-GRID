@@ -41,13 +41,13 @@ router.post('/register', async (req: AuthRequest, res: Response) => {
     const accessToken = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET || 'default-secret',
-      { expiresIn: process.env.JWT_EXPIRY || '1h' }
+      { expiresIn: (process.env.JWT_EXPIRY || '1h') as any }
     );
 
     const refreshToken = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_REFRESH_SECRET || 'default-refresh-secret',
-      { expiresIn: process.env.JWT_REFRESH_EXPIRY || '7d' }
+      { expiresIn: (process.env.JWT_REFRESH_EXPIRY || '7d') as any }
     );
 
     // Store refresh token hash
@@ -114,13 +114,13 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
     const accessToken = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_SECRET || 'default-secret',
-      { expiresIn: process.env.JWT_EXPIRY || '1h' }
+      { expiresIn: (process.env.JWT_EXPIRY || '1h') as any }
     );
 
     const refreshToken = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.JWT_REFRESH_SECRET || 'default-refresh-secret',
-      { expiresIn: process.env.JWT_REFRESH_EXPIRY || '7d' }
+      { expiresIn: (process.env.JWT_REFRESH_EXPIRY || '7d') as any }
     );
 
     // Store refresh token hash
@@ -190,7 +190,7 @@ router.post('/refresh', async (req: AuthRequest, res: Response) => {
     const accessToken = jwt.sign(
       { userId: decoded.userId, email: decoded.email },
       process.env.JWT_SECRET || 'default-secret',
-      { expiresIn: process.env.JWT_EXPIRY || '1h' }
+      { expiresIn: (process.env.JWT_EXPIRY || '1h') as any }
     );
 
     const response: AuthToken = {

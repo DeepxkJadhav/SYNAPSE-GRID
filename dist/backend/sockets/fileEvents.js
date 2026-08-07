@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupFileEvents = void 0;
-const shared_1 = require("@collab/shared");
+const shared_1 = require("@synapse/shared");
 const setupFileEvents = (socket, io) => {
     // ============== FILE OPEN ==============
     socket.on(shared_1.SocketEventType.FILE_OPEN, (data) => {

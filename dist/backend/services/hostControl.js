@@ -22,7 +22,7 @@ class HostControlService {
             const fsSize = await systeminformation_1.default.fsSize();
             return {
                 hostname: osInfo.hostname,
-                uptime: await systeminformation_1.default.time().then((time) => time.uptime),
+                uptime: systeminformation_1.default.time().uptime,
                 cpu: {
                     model: cpu.model,
                     cores: cpu.cores,
@@ -35,10 +35,10 @@ class HostControlService {
                     percent: (mem.used / mem.total) * 100,
                 },
                 disk: {
-                    total: fsSize[0]?.total || 0,
+                    total: fsSize[0]?.size || 0,
                     used: fsSize[0]?.used || 0,
                     available: fsSize[0]?.available || 0,
-                    percent: fsSize[0] ? (fsSize[0].used / fsSize[0].total) * 100 : 0,
+                    percent: fsSize[0] ? (fsSize[0].used / fsSize[0].size) * 100 : 0,
                 },
             };
         }
@@ -102,7 +102,7 @@ class HostControlService {
         const usage = {
             cpu: cpuUsage,
             memory: memUsage.percent,
-            disk: disk[0] ? (disk[0].used / disk[0].total) * 100 : 0,
+            disk: disk[0] ? (disk[0].used / disk[0].size) * 100 : 0,
             timestamp: new Date(),
         };
         this.resourceHistory.push(usage);

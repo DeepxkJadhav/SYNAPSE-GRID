@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupPresenceEvents = void 0;
-const shared_1 = require("@collab/shared");
+const shared_1 = require("@synapse/shared");
 const setupPresenceEvents = (socket, io) => {
     // ============== USER JOIN ==============
     socket.on(shared_1.SocketEventType.USER_JOIN, (data) => {

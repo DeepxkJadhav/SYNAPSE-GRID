@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
+    "test": "echo \"No frontend tests configured yet\"",
     "lint": "eslint src/**/*.{ts,tsx}"
   },
   "dependencies": {

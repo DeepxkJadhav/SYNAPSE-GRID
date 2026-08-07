@@ -7,7 +7,7 @@ const express_1 = require("express");
 const connection_1 = require("../db/connection");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const shared_1 = require("@collab/shared");
+const shared_1 = require("@synapse/shared");
 const router = (0, express_1.Router)();
 // ============== REGISTER ==============
 router.post('/register', async (req, res) => {
@@ -27,8 +27,8 @@ router.post('/register', async (req, res) => {
         const result = await (0, connection_1.query)('INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3) RETURNING id, email, username, created_at', [email, username, passwordHash]);
         const user = result.rows[0];
         // Generate tokens
-        const accessToken = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET || 'default-secret', { expiresIn: process.env.JWT_EXPIRY || '1h' });
-        const refreshToken = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email }, process.env.JWT_REFRESH_SECRET || 'default-refresh-secret', { expiresIn: process.env.JWT_REFRESH_EXPIRY || '7d' });
+        const accessToken = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET || 'default-secret', { expiresIn: (process.env.JWT_EXPIRY || '1h') });
+        const refreshToken = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email }, process.env.JWT_REFRESH_SECRET || 'default-refresh-secret', { expiresIn: (process.env.JWT_REFRESH_EXPIRY || '7d') });
         // Store refresh token hash
         const refreshTokenHash = await bcryptjs_1.default.hash(refreshToken, 10);
         const expiresAt = new Date();
@@ -77,8 +77,8 @@ router.post('/login', async (req, res) => {
             throw new shared_1.AppError('Invalid credentials', 401, 'UNAUTHORIZED');
         }
         // Generate tokens
-        const accessToken = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET || 'default-secret', { expiresIn: process.env.JWT_EXPIRY || '1h' });
-        const refreshToken = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email }, process.env.JWT_REFRESH_SECRET || 'default-refresh-secret', { expiresIn: process.env.JWT_REFRESH_EXPIRY || '7d' });
+        const accessToken = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET || 'default-secret', { expiresIn: (process.env.JWT_EXPIRY || '1h') });
+        const refreshToken = jsonwebtoken_1.default.sign({ userId: user.id, email: user.email }, process.env.JWT_REFRESH_SECRET || 'default-refresh-secret', { expiresIn: (process.env.JWT_REFRESH_EXPIRY || '7d') });
         // Store refresh token hash
         const refreshTokenHash = await bcryptjs_1.default.hash(refreshToken, 10);
         const expiresAt = new Date();
@@ -125,7 +125,7 @@ router.post('/refresh', async (req, res) => {
             throw new shared_1.AppError('Invalid or expired refresh token', 401, 'UNAUTHORIZED');
         }
         // Generate new access token
-        const accessToken = jsonwebtoken_1.default.sign({ userId: decoded.userId, email: decoded.email }, process.env.JWT_SECRET || 'default-secret', { expiresIn: process.env.JWT_EXPIRY || '1h' });
+        const accessToken = jsonwebtoken_1.default.sign({ userId: decoded.userId, email: decoded.email }, process.env.JWT_SECRET || 'default-secret', { expiresIn: (process.env.JWT_EXPIRY || '1h') });
         const response = {
             accessToken,
             refreshToken,

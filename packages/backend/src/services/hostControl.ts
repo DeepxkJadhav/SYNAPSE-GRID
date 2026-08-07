@@ -55,13 +55,13 @@ export class HostControlService {
     try {
       const osInfo = await si.osInfo();
       const cpu = await si.cpu();
-      const cpuSpeed = await si.cpuSpeed();
+      const cpuSpeed = await (si as any).cpuSpeed();
       const mem = await si.mem();
       const fsSize = await si.fsSize();
 
       return {
         hostname: osInfo.hostname,
-        uptime: await si.time().then((time) => time.uptime),
+        uptime: si.time().uptime,
         cpu: {
           model: cpu.model,
           cores: cpu.cores,
@@ -74,10 +74,10 @@ export class HostControlService {
           percent: (mem.used / mem.total) * 100,
         },
         disk: {
-          total: fsSize[0]?.total || 0,
-          used: fsSize[0]?.used || 0,
-          available: fsSize[0]?.available || 0,
-          percent: fsSize[0] ? (fsSize[0].used / fsSize[0].total) * 100 : 0,
+          total: (fsSize[0] as any)?.size || 0,
+          used: (fsSize[0] as any)?.used || 0,
+          available: (fsSize[0] as any)?.available || 0,
+          percent: fsSize[0] ? ((fsSize[0] as any).used / (fsSize[0] as any).size) * 100 : 0,
         },
       };
     } catch (error: any) {
@@ -142,7 +142,7 @@ export class HostControlService {
     const usage: ResourceUsage = {
       cpu: cpuUsage,
       memory: memUsage.percent,
-      disk: disk[0] ? (disk[0].used / disk[0].total) * 100 : 0,
+      disk: disk[0] ? ((disk[0] as any).used / (disk[0] as any).size) * 100 : 0,
       timestamp: new Date(),
     };
 

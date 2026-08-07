@@ -97,7 +97,7 @@ export class CompilerService {
     return `code_${Date.now()}.${extensions[language]}`;
   }
 
-  private executeCompile(filePath: string, language: SupportedLanguage): Partial<CompileResult> {
+  private executeCompile(filePath: string, language: SupportedLanguage): Omit<CompileResult, 'executionTime' | 'language'> {
     let command: string;
 
     switch (language) {
@@ -125,7 +125,7 @@ export class CompilerService {
     }
   }
 
-  private executeCode(filePath: string, language: SupportedLanguage, input?: string): Partial<ExecuteResult> {
+  private executeCode(filePath: string, language: SupportedLanguage, input?: string): Omit<ExecuteResult, 'executionTime' | 'language'> {
     let command: string;
 
     switch (language) {

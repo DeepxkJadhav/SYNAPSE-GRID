@@ -181,7 +181,7 @@ router.get('/:sessionId', authMiddleware, async (req: AuthRequest, res: Response
       [sessionId]
     );
 
-    const files = filesResult.rows.map(row => ({
+    const files = filesResult.rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       path: row.path,

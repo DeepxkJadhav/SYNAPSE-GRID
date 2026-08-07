@@ -139,7 +139,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
       [req.userId]
     );
 
-    const sessions = result.rows.map(row => ({
+    const sessions = result.rows.map((row: any) => ({
       id: row.id,
       ownerId: row.owner_id,
       name: row.name,
@@ -203,7 +203,7 @@ router.get('/:sessionId', authMiddleware, async (req: AuthRequest, res: Response
       [sessionId]
     );
 
-    const members = membersResult.rows.map(row => ({
+    const members = membersResult.rows.map((row: any) => ({
       id: row.id,
       username: row.username,
       email: row.email,

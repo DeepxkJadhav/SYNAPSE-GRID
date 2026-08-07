@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const connection_1 = require("../db/connection");
 const auth_1 = require("../middleware/auth");
-const shared_1 = require("@collab/shared");
+const shared_1 = require("@synapse/shared");
 const router = (0, express_1.Router)();
 // ============== CREATE FILE/FOLDER ==============
 router.post('/:sessionId', auth_1.authMiddleware, async (req, res) => {
@@ -128,7 +128,7 @@ router.get('/:sessionId', auth_1.authMiddleware, async (req, res) => {
        FROM files
        WHERE session_id = $1 AND is_deleted = FALSE
        ORDER BY path ASC`, [sessionId]);
-        const files = filesResult.rows.map(row => ({
+        const files = filesResult.rows.map((row) => ({
             id: row.id,
             name: row.name,
             path: row.path,
