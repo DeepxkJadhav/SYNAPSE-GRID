@@ -2,6 +2,7 @@
   "name": "synapsegrid",
   "version": "1.0.0",
   "description": "SynapseGrid - Advanced collaborative development environment with multi-language compiler, AI code assistant, and host control",
+  "author": "Deepak Jadhav <deepak.s.jadhav07@gmail.com>",
   "private": true,
   "workspaces": [
     "packages/frontend",

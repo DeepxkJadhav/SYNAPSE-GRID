@@ -1,431 +1,235 @@
-# SynapseGrid - Advanced Collaborative Development Environment
+﻿<div align="center">
 
-**SynapseGrid** is an enterprise-grade, real-time collaborative development platform combining Google Docs-style code editing with VS Code features, AI-powered code assistance, multi-language compilation, and comprehensive host control capabilities.
+# ⚡ SynapseGrid
+### Enterprise Real-Time Collaborative IDE & Multi-Language Execution Platform
 
-## 🎯 Core Features
+[![License: MIT](https://img.shields.io/badge/License-MIT-10B981.svg?style=for-the-badge)](./LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-14-000000.svg?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB.svg?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6.svg?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933.svg?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-### Phase 1: Foundation ✅
-- **User Authentication**: Secure registration, login, JWT-based sessions
-- **Session Management**: Create, join, invite collaborators
-- **Role-Based Access Control (RBAC)**: Owner, Editor, Viewer roles
-- **Multi-Database**: PostgreSQL for persistence + Redis for real-time state
+<p align="center">
+  <b>Live Multi-User CRDT Code Editing • Multi-Language Compiler • AI Assistant Bot • Host Telemetry Control</b><br>
+  <i>Combining Google Docs-style collaboration with VS Code power and intelligent operations.</i>
+</p>
 
-### Phase 2: Real-Time Collaboration 🔄
-- **Live Code Editing**: Powered by Yjs + Monaco Editor
-- **Presence Tracking**: Real-time cursor tracking and user awareness
-- **Multi-User Synchronization**: Conflict-free CRDT-based sync
+---
 
-### Phase 3: Advanced Features 🔄
-- **Terminal Sync**: Per-user isolated terminals
-- **Code Sandbox**: Docker-based secure code execution
-- **Multi-Language Compiler**: Python, JavaScript, TypeScript, Java, C++, Go, Rust, C#
-- **AI Code Assistant Bot**: Code review, debugging, generation, completion suggestions
-- **Host Control**: System monitoring, process management, resource tracking
+![SynapseGrid Command Center](./assets/showcase/hero.png)
 
-## 🚀 New Features
+---
 
-### 📝 Multi-Language Compiler
-Compile and execute code in 8+ languages with sandboxed execution:
-- Python, JavaScript, TypeScript, Java, C++, Go, Rust, C#
-- Real-time compilation feedback
-- Code execution with standard input/output
-- Timeout protection and error handling
+</div>
 
-**API Endpoints:**
-```
-POST /api/compiler/compile    - Compile code
-POST /api/compiler/execute    - Execute code
-GET  /api/compiler/languages  - List supported languages
-```
+## ✦ What is SynapseGrid?
 
-### 🤖 Code Assistant Bot
-AI-powered intelligent code helper using OpenAI integration:
-- **Code Review**: Automatic issue detection and suggestions
-- **Bug Analysis**: Error diagnosis and fix suggestions
-- **Code Generation**: Generate code from descriptions
-- **Code Completion**: Smart context-aware suggestions
-- **Code Explanation**: Understand complex code segments
+**SynapseGrid** is an advanced collaborative development environment that merges real-time multi-user code editing with instant multi-language compilation, autonomous AI code assistance, and deep host system monitoring.
 
-**API Endpoints:**
-```
-POST /api/assistant/review     - Review code for issues
-POST /api/assistant/debug      - Analyze and fix bugs
-POST /api/assistant/generate   - Generate code from description
-POST /api/assistant/complete   - Get code completion suggestions
-POST /api/assistant/explain    - Explain code functionality
-```
+Whether debugging complex distributed systems, conducting live technical pair-programming, or executing code across 8+ compiled and interpreted languages, SynapseGrid provides an all-in-one cybernetic workstation.
 
-### 🖥️ Host Control System
-Comprehensive system monitoring and process management:
-- Real-time CPU, Memory, Disk monitoring
-- Process monitoring and termination
-- Port availability checking
-- Network interface information
-- Disk health monitoring
-- Resource usage history tracking
+---
 
-**API Endpoints:**
-```
-GET  /api/host/system-info       - System information
-GET  /api/host/processes         - Running processes
-POST /api/host/processes/:pid/kill - Kill process
-GET  /api/host/cpu-usage         - CPU usage
-GET  /api/host/memory-usage      - Memory usage
-GET  /api/host/usage-history     - Resource history
-GET  /api/host/available-ports   - Find available ports
-GET  /api/host/network-info      - Network interfaces
-GET  /api/host/disk-health       - Disk health
-GET  /api/host/system-load       - System load
-```
-
-## 🛠️ Tech Stack
-
-| Component | Technology |
-|-----------|-----------|
-| **Frontend** | Next.js 14 + React 18 + Monaco Editor + Yjs |
-| **Backend** | Node.js + Express + Socket.io |
-| **Database** | PostgreSQL + Redis |
-| **Real-time** | Yjs CRDT + WebSocket |
-| **AI** | OpenAI API (GPT-3.5-turbo) |
-| **Monitoring** | systeminformation |
-| **Containerization** | Docker + Docker Compose |
-
-## 📦 Project Structure
+## 🚀 Core Capabilities
 
 ```
-synapsegrid/
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       SYNAPSEGRID                                           │
+├──────────────────────┬──────────────────────┬──────────────────────┬────────────────────────┤
+│ 👥 Live Collaboration│ ⚡ Multi-Compiler     │ 🤖 AI Assistant      │ 🖥️ Host Telemetry     │
+│ • Yjs CRDT Sync      │ • 8+ Languages       │ • Code Review        │ • CPU / RAM Monitoring │
+│ • Monaco Editor      │ • Sandboxed Exec     │ • Automated Debugging│ • Process Management   │
+│ • Multi-Cursor Live  │ • Real-time Output   │ • Smart Completion   │ • Port Availability    │
+│ • RBAC Permissions   │ • Timeout Protection │ • Code Explanation   │ • Disk Health Metrics  │
+└──────────────────────┴──────────────────────┴──────────────────────┴────────────────────────┘
+```
+
+### 1. 👥 Real-Time Collaborative Editor
+- **Conflict-Free Synchronization**: Powered by **Yjs CRDT** over WebSockets.
+- **Monaco Code Editor**: Full VS Code editing experience with syntax highlighting, auto-formatting, and multi-cursor presence.
+- **Session Management**: Role-based access control (`Owner`, `Editor`, `Viewer`) with one-click invite links.
+
+### 2. 📝 Multi-Language Compiler & Sandbox
+Compile and run code on-demand with isolated sandbox security:
+- **Supported Languages**: `Python`, `JavaScript`, `TypeScript`, `Java`, `C++`, `Go`, `Rust`, `C#`.
+- **Real-Time Terminal Streaming**: Captures standard output (`stdout`), standard error (`stderr`), and execution runtimes.
+
+### 3. 🤖 AI Code Assistant Bot
+Integrated AI intelligence for rapid development workflows:
+- **Code Review**: Automatically detects security vulnerabilities, memory leaks, and anti-patterns.
+- **Automated Debugging**: Diagnoses stack traces and suggests drop-in code fixes.
+- **Code Generation & Completion**: Context-aware snippet generator from natural language prompts.
+- **Deep Explanations**: Breaks down complex algorithms and architecture diagrams.
+
+### 4. 🖥️ Host Control & Telemetry System
+- **Real-Time Metrics**: Live tracking of CPU loads, memory utilization, network throughput, and disk health.
+- **Process Manager**: Inspect running system processes with permission-gated process termination (`kill`).
+- **Network Diagnostic**: Automated port availability scanning and network interface analysis.
+
+---
+
+## 🏗️ System Architecture
+
+```
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                              CLIENT INTERFACES                                │
+│       Next.js 14 Web App  •  Electron Desktop App  •  Stand-alone Demo        │
+└──────────────────────────────────────┬────────────────────────────────────────┘
+                                       │
+                         WebSocket (Yjs) / REST API
+                                       │
+                                       ▼
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                         SYNAPSEGRID BACKEND ENGINE                            │
+│  ┌────────────────────────┐  ┌────────────────────────┐  ┌─────────────────┐  │
+│  │   EXPRESS REST API     │  │   SOCKET.IO / YJS      │  │  SYSTEM MONITOR │  │
+│  │   Auth, Compiler, AI   │  │   Multi-Cursor Sync    │  │  Host Telemetry │  │
+│  └───────────┬────────────┘  └───────────┬────────────┘  └────────┬────────┘  │
+└──────────────┼───────────────────────────┼────────────────────────┼───────────┘
+               │                           │                        │
+               ▼                           ▼                        ▼
+┌───────────────────────────┐  ┌────────────────────────┐  ┌────────────────────┐
+│      DATABASE LAYER       │  │   SANDBOX COMPILER     │  │  AI ASSISTANT HUB  │
+│  PostgreSQL (Persistence) │  │   Docker / Subprocess  │  │  OpenAI / Gemini / │
+│  Redis (Real-time State)  │  │   8+ Language Runtimes │  │  Local LLM Routers │
+└───────────────────────────┘  └────────────────────────┘  └────────────────────┘
+```
+
+---
+
+## 🗂️ Project Structure
+
+```text
+SYNAPSE-GRID/
 ├── packages/
-│   ├── backend/
+│   ├── backend/               # Express + Socket.io + Compiler + AI Hub
 │   │   ├── src/
-│   │   │   ├── routes/
-│   │   │   │   ├── auth.ts
-│   │   │   │   ├── compiler.ts      [NEW]
-│   │   │   │   ├── assistant.ts     [NEW]
-│   │   │   │   └── hostControl.ts   [NEW]
-│   │   │   ├── services/
-│   │   │   │   ├── compiler.ts      [NEW]
-│   │   │   │   ├── codeAssistant.ts [NEW]
-│   │   │   │   └── hostControl.ts   [NEW]
-│   │   │   ├── middleware/
-│   │   │   ├── sockets/
-│   │   │   └── db/
-│   │   └── Dockerfile
-│   ├── frontend/
+│   │   │   ├── routes/        # Compiler, Assistant, Host Control, Auth routes
+│   │   │   ├── services/      # Compiler execution & AI integration services
+│   │   │   ├── sockets/       # WebSocket synchronization handlers
+│   │   │   └── server.ts      # Server entry point
+│   │   └── package.json
+│   │
+│   ├── frontend/              # Next.js 14 + Tailwind CSS + Monaco Editor UI
 │   │   ├── src/
-│   │   │   ├── components/        [Enhanced UI]
-│   │   │   ├── pages/
-│   │   │   └── lib/
-│   │   └── Dockerfile
-│   └── shared/
-│       ├── types.ts               [Updated]
-│       └── index.ts
-├── docker-compose.yml
-├── package.json                    [Updated]
-└── README.md                       [This file]
-```
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Docker & Docker Compose (recommended)
-- Node.js 20+ (for local development)
-- OpenAI API key (for code assistant)
-
-### Option 1: Docker Compose (Recommended)
-
-```bash
-# Clone/setup repository
-cd synapsegrid
-
-# Copy environment file
-cp .env.example .env
-
-# Update .env with:
-# - OPENAI_API_KEY=your_api_key_here
-# - Database credentials
-# - Frontend URL
-
-# Start all services
-docker-compose up
-
-# Access:
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:5000
-# Database: localhost:5432
-# Redis: localhost:6379
-```
-
-### Option 2: Local Development
-
-```bash
-# Install dependencies
-npm install
-
-# Setup database
-npm run db:setup
-
-# Environment variables
-cp .env.example .env
-# Update OPENAI_API_KEY and database settings
-
-# Start backend
-npm run dev -w @synapse/backend
-
-# In another terminal, start frontend
-npm run dev -w @synapse/frontend
-
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:5000
-```
-
-## 🔌 API Examples
-
-### Compiler API
-```bash
-# Execute Python code
-curl -X POST http://localhost:5000/api/compiler/execute \
-  -H "Content-Type: application/json" \
-  -d '{
-    "code": "print(\"Hello, SynapseGrid!\")",
-    "language": "python"
-  }'
-
-# Compile TypeScript
-curl -X POST http://localhost:5000/api/compiler/compile \
-  -H "Content-Type: application/json" \
-  -d '{
-    "code": "const x: number = 42;",
-    "language": "typescript"
-  }'
-```
-
-### Assistant API
-```bash
-# Review code
-curl -X POST http://localhost:5000/api/assistant/review \
-  -H "Content-Type: application/json" \
-  -d '{
-    "code": "function add(a, b) { return a + b; }",
-    "language": "javascript"
-  }'
-
-# Generate code
-curl -X POST http://localhost:5000/api/assistant/generate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "description": "Create a function to calculate factorial",
-    "language": "python"
-  }'
-```
-
-### Host Control API
-```bash
-# Get system info
-curl http://localhost:5000/api/host/system-info
-
-# Get processes
-curl http://localhost:5000/api/host/processes
-
-# Get CPU usage
-curl http://localhost:5000/api/host/cpu-usage
-
-# Find available ports
-curl http://localhost:5000/api/host/available-ports?start=3000&end=3100
-```
-
-```bash
-# Install dependencies
-npm install
-
-# Setup environment
-cp .env.example .env
-
-# Start PostgreSQL and Redis (Docker)
-docker-compose up postgres redis
-
-# In separate terminals:
-npm run dev -w @collab/backend  # Starts on :5000
-npm run dev -w @collab/frontend # Starts on :3000
-```
-
-## Project Structure
-
-```
-collab-dev-env/
-├── packages/
-│   ├── frontend/          # Next.js React app
-│   │   ├── src/
-│   │   │   ├── pages/     # Next.js pages (login, register, dashboard, editor)
-│   │   │   ├── components/# React components (Editor, FileTree, Terminal, Presence)
-│   │   │   ├── lib/       # API client, Zustand stores
-│   │   │   └── globals.css
-│   │   └── Dockerfile
-│   ├── backend/           # Node.js Express server
-│   │   ├── src/
-│   │   │   ├── server.ts
-│   │   │   ├── routes/    # auth, sessions, files
-│   │   │   ├── services/  # SessionService, FileService, TerminalService
-│   │   │   ├── middleware/# auth, errorHandler, rbac
-│   │   │   ├── sockets/   # fileEvents, presenceEvents
-│   │   │   └── db/        # PostgreSQL schema & connection
-│   │   └── Dockerfile
-│   └── shared/            # TypeScript types & interfaces
-├── docker-compose.yml
-├── .env.example
-├── .gitignore
+│   │   │   ├── pages/         # Dashboard, workspace, and editor views
+│   │   │   ├── lib/           # Yjs provider & socket client
+│   │   │   └── types/
+│   │   └── package.json
+│   │
+│   └── shared/                # Shared TypeScript contracts & schemas
+│       ├── types.ts
+│       └── package.json
+│
+├── src/main/                  # Electron Desktop Shell wrapper
+│   ├── main.ts
+│   └── preload.ts
+│
+├── assets/showcase/           # High-resolution showcase media
+│   └── hero.png
+│
+├── demo.html                  # Standalone interactive browser showcase
+├── mock-server.js             # Lightweight standalone testing backend
+├── docker-compose.yml         # Containerized PostgreSQL, Redis, Backend, Frontend
+├── package.json               # Monorepo root workspace configuration
 └── README.md
 ```
 
-## API Routes
+---
 
-### Auth
-- `POST /api/auth/register` - Register user
-- `POST /api/auth/login` - Login user
-- `POST /api/auth/refresh` - Refresh access token
+## ⚡ Quick Start
 
-### Sessions
-- `POST /api/sessions` - Create new session
-- `GET /api/sessions` - List user's sessions
-- `GET /api/sessions/:sessionId` - Get session details
-- `POST /api/sessions/join` - Join session by invite code
+### 1. Prerequisites
+- **Node.js** 18.0+ & **npm**
+- **Docker & Docker Compose** (optional, for full containerized stack)
 
-### Files
-- `POST /api/files/:sessionId` - Create file/folder
-- `GET /api/files/:sessionId` - List files in session
-- `GET /api/files/:sessionId/:fileId` - Get file content
-
-## WebSocket Events
-
-### File Events
-- `file:open` - User opens file
-- `file:close` - User closes file
-- `file:update` - File content changes (Yjs delta)
-- `file:delete` - File deleted
-- `file:rename` - File renamed
-- `file:list-update` - File tree changed
-
-### Presence Events
-- `user:join` - User joined session
-- `user:leave` - User left session
-- `presence:update` - User presence (cursor, active file)
-- `cursor:move` - Cursor position changed
-- `selection:change` - Text selection changed
-
-## Database Schema
-
-### Tables
-- `users` - User accounts
-- `sessions` - Collaboration sessions
-- `session_users` - Session membership + RBAC
-- `files` - File nodes (files and folders)
-- `file_revisions` - File version history
-- `audit_logs` - Activity log
-- `refresh_tokens` - Token management
-
-## Development Workflow
-
-### Phase 1 (Current)
-- [x] Project scaffolding
-- [x] Auth system (register, login, JWT)
-- [x] Session management (create, join, RBAC)
-- [x] Database schema
-- [x] Backend API routes
-- [x] Frontend pages (login, register, dashboard)
-- [ ] Tests & verification
-
-### Phase 2 (Next)
-- [ ] Yjs + Monaco integration
-- [ ] Real-time file sync via WebSocket
-- [ ] Presence tracking (cursors, user awareness)
-- [ ] File tree with create/delete/rename
-- [ ] Conflict resolution testing
-
-### Phase 3
-- [ ] Terminal service (per-user PTY)
-- [ ] Docker sandbox (per-user container)
-- [ ] Terminal WebSocket sync
-- [ ] Code execution with timeout
-
-### Phase 4+
-- [ ] Persistence & session recovery
-- [ ] Horizontal scaling (multi-server)
-- [ ] Performance optimization
-- [ ] Production deployment
-
-## Testing
+### 2. Installation
 
 ```bash
-# Run unit tests
-npm run test
+# Clone the repository
+git clone https://github.com/DeepxkJadhav/SYNAPSE-GRID.git
+cd SYNAPSE-GRID
 
-# Run integration tests
-npm run test:integration
-
-# Run E2E tests
-npm run test:e2e
-
-# Build for production
-npm run build
+# Install monorepo dependencies
+npm install
 ```
 
-## Environment Variables
+### 3. Environment Configuration
 
-See `.env.example` for all available options:
-- `BACKEND_PORT` - Server port (default: 5000)
-- `DATABASE_URL` - PostgreSQL connection string
-- `REDIS_URL` - Redis connection string
-- `JWT_SECRET` - Secret for access token signing
-- `JWT_REFRESH_SECRET` - Secret for refresh token
-- `FRONTEND_URL` - Frontend origin (for CORS)
-
-## Troubleshooting
-
-### Port already in use
 ```bash
-# Kill process on port 5000 (backend)
-lsof -ti:5000 | xargs kill -9
-
-# Kill process on port 3000 (frontend)
-lsof -ti:3000 | xargs kill -9
+cp .env.example .env
 ```
 
-### Database connection error
+```ini
+PORT=5000
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/synapsegrid
+REDIS_URL=redis://localhost:6379
+OPENAI_API_KEY=your_openai_api_key_here
+JWT_SECRET=your_super_secret_jwt_key
+```
+
+### 4. Running with Docker Compose (Recommended)
+
 ```bash
-# Check if PostgreSQL is running
-docker-compose logs postgres
-
-# Reset database
-docker-compose down -v
-docker-compose up
+docker compose up -d
 ```
+- **Web Interface**: `http://localhost:3000`
+- **Backend API**: `http://localhost:5000`
 
-### Redis connection error
+### 5. Running in Development Mode
+
 ```bash
-# Check if Redis is running
-docker-compose logs redis
-
-# Test connection
-redis-cli -p 6379 ping
+# Start backend and frontend simultaneously
+npm run dev
 ```
 
-## Contributing
+### 6. Interactive Standalone Demo
 
-1. Create a branch for your feature
-2. Write tests first (TDD approach)
-3. Implement feature
-4. Submit PR with description
+To test the collaborative interface immediately without external databases:
+```bash
+node mock-server.js
+```
+Open `demo.html` in your browser.
 
-## License
+---
 
-MIT
+## 📡 API Reference Overview
 
-## Next Steps
+### Compiler Engine
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/compiler/compile` | Compiles source code across 8 languages |
+| `POST` | `/api/compiler/execute` | Executes binary/script with timeout guards |
+| `GET` | `/api/compiler/languages` | Lists available compilers & execution environments |
 
-After Phase 1 verification:
-1. Run `docker-compose up`
-2. Create user account at http://localhost:3000
-3. Create a session and invite code
-4. Join session from another browser tab
-5. Verify user management and session persistence
+### AI Assistant Bot
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/assistant/review` | Analyzes code for quality, performance, and security |
+| `POST` | `/api/assistant/debug` | Diagnoses runtime bugs & provides fixed snippets |
+| `POST` | `/api/assistant/generate` | Generates full functions from natural language prompts |
+| `POST` | `/api/assistant/explain` | Explains logic and algorithmic complexity |
 
-Phase 2 will add real-time file collaboration and presence tracking.
+### Host Telemetry & Control
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/host/system-info` | Hardware, OS, and platform metrics |
+| `GET` | `/api/host/cpu-usage` | Real-time multi-core CPU utilization |
+| `GET` | `/api/host/memory-usage` | Active, allocated, and free RAM |
+| `GET` | `/api/host/processes` | List active processes and PIDs |
+| `POST` | `/api/host/processes/:pid/kill` | Terminate process with permission validation |
+
+---
+
+## 👤 Author
+
+**Deepak Jadhav**
+- GitHub: [@DeepxkJadhav](https://github.com/DeepxkJadhav)
+- Repository: [SYNAPSE-GRID](https://github.com/DeepxkJadhav/SYNAPSE-GRID)
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](./LICENSE) — Copyright (c) 2026 **Deepak Jadhav**.
