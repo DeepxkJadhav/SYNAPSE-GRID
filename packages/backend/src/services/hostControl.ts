@@ -55,17 +55,17 @@ export class HostControlService {
     try {
       const osInfo = await si.osInfo();
       const cpu = await si.cpu();
-      const cpuSpeed = await (si as any).cpuSpeed();
+      const speed = cpu.speed || 2.4;
       const mem = await si.mem();
       const fsSize = await si.fsSize();
 
       return {
-        hostname: osInfo.hostname,
+        hostname: osInfo.hostname || 'localhost',
         uptime: si.time().uptime,
         cpu: {
-          model: cpu.model,
-          cores: cpu.cores,
-          speed: cpuSpeed.avg,
+          model: cpu.model || 'Standard CPU',
+          cores: cpu.cores || 4,
+          speed: speed,
         },
         memory: {
           total: mem.total,

@@ -18,6 +18,7 @@ export interface GeneratedCode {
 }
 export declare class CodeAssistantBot {
     private client;
+    private hasApiKey;
     constructor(apiKey?: string);
     reviewCode(code: string, language: string): Promise<CodeReview>;
     suggestCompletion(code: string, language: string, context?: string): Promise<CodeCompletion>;

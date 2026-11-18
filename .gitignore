@@ -15,3 +15,7 @@ coverage/
 *.swo
 build/
 out/
+.next/
+temp_files/
+packages/frontend/out/
+packages/frontend/.next/

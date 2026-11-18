@@ -24,10 +24,13 @@ export interface GeneratedCode {
 
 export class CodeAssistantBot {
   private client: OpenAI;
+  private hasApiKey: boolean;
 
   constructor(apiKey?: string) {
+    const key = apiKey || process.env.OPENAI_API_KEY || '';
+    this.hasApiKey = !!key && !key.startsWith('sk-synapse');
     this.client = new OpenAI({
-      apiKey: apiKey || process.env.OPENAI_API_KEY,
+      apiKey: key || 'sk-synapse-offline-key',
     });
   }
 

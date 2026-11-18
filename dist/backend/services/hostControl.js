@@ -17,16 +17,16 @@ class HostControlService {
         try {
             const osInfo = await systeminformation_1.default.osInfo();
             const cpu = await systeminformation_1.default.cpu();
-            const cpuSpeed = await systeminformation_1.default.cpuSpeed();
+            const speed = cpu.speed || 2.4;
             const mem = await systeminformation_1.default.mem();
             const fsSize = await systeminformation_1.default.fsSize();
             return {
-                hostname: osInfo.hostname,
+                hostname: osInfo.hostname || 'localhost',
                 uptime: systeminformation_1.default.time().uptime,
                 cpu: {
-                    model: cpu.model,
-                    cores: cpu.cores,
-                    speed: cpuSpeed.avg,
+                    model: cpu.model || 'Standard CPU',
+                    cores: cpu.cores || 4,
+                    speed: speed,
                 },
                 memory: {
                     total: mem.total,

@@ -1,18 +1,18 @@
 ﻿<div align="center">
 
 # ⚡ SynapseGrid
-### Enterprise Real-Time Collaborative IDE & Multi-Language Execution Platform
+### Next-Gen Cybernetic Workstation, Multi-Language Compiler & Autonomous Prime Agent RLM
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-10B981.svg?style=for-the-badge)](./LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-14-000000.svg?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-18-61DAFB.svg?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Electron](https://img.shields.io/badge/Electron-27-47848F.svg?style=for-the-badge&logo=electron&logoColor=white)](https://electronjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000.svg?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6.svg?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933.svg?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933.svg?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Prime Agent](https://img.shields.io/badge/Prime%20Agent-RLM%20Engine-6366F1.svg?style=for-the-badge)](https://github.com/DeepxkJadhav/SYNAPSE-GRID)
 
 <p align="center">
-  <b>Live Multi-User CRDT Code Editing • Multi-Language Compiler • AI Assistant Bot • Host Telemetry Control</b><br>
-  <i>Combining Google Docs-style collaboration with VS Code power and intelligent operations.</i>
+  <b>Autonomous Prime Agent Studio • Native Host Telemetry Radar • Multi-Language Compiler Sandbox • Live Yjs CRDT Mesh</b><br>
+  <i>A cybernetic developer workstation combining local offline autonomy with cloud collaboration and recursive AI execution.</i>
 </p>
 
 ---
@@ -25,9 +25,11 @@
 
 ## ✦ What is SynapseGrid?
 
-**SynapseGrid** is an advanced collaborative development environment that merges real-time multi-user code editing with instant multi-language compilation, autonomous AI code assistance, and deep host system monitoring.
+**SynapseGrid** is a cybernetic developer environment engineered for elite autonomous engineering, instantaneous multi-language compilation, and hardware host telemetry.
 
-Whether debugging complex distributed systems, conducting live technical pair-programming, or executing code across 8+ compiled and interpreted languages, SynapseGrid provides an all-in-one cybernetic workstation.
+Powered by a dual-engine architecture:
+1. **Local Standalone Desktop Mode (Default)**: Runs 100% offline with zero external dependencies (no Docker or PostgreSQL required). Direct native file system access, hardware metrics, local compiler bridges, and embedded Recursive Language Model (RLM).
+2. **Cloud Collaborative Mesh Mode**: Connects to remote teams with **Yjs CRDT** WebSockets, multi-cursor presence, and persistent cluster state.
 
 ---
 
@@ -37,199 +39,122 @@ Whether debugging complex distributed systems, conducting live technical pair-pr
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                       SYNAPSEGRID                                           │
 ├──────────────────────┬──────────────────────┬──────────────────────┬────────────────────────┤
-│ 👥 Live Collaboration│ ⚡ Multi-Compiler     │ 🤖 AI Assistant      │ 🖥️ Host Telemetry     │
-│ • Yjs CRDT Sync      │ • 8+ Languages       │ • Code Review        │ • CPU / RAM Monitoring │
-│ • Monaco Editor      │ • Sandboxed Exec     │ • Automated Debugging│ • Process Management   │
-│ • Multi-Cursor Live  │ • Real-time Output   │ • Smart Completion   │ • Port Availability    │
-│ • RBAC Permissions   │ • Timeout Protection │ • Code Explanation   │ • Disk Health Metrics  │
+│ 🤖 Prime Agent RLM   │ ⚡ Multi-Compiler     │ 🖥️ Host Telemetry     │ 👥 Collaborative Mesh  │
+│ • Autonomous Fix     │ • 8+ Languages       │ • Real-time CPU/RAM  │ • Yjs CRDT Sync        │
+│ • Python REPL Kernel │ • Millisecond Bench  │ • Task Kill Manager  │ • Multi-Cursor Live    │
+│ • Continual Memory   │ • Sandboxed Runner   │ • Port Availability  │ • Offline Persistence  │
+│ • Subagent Swarms    │ • Stdout/Stderr Pipe │ • Disk Health Radar  │ • RBAC Permissions     │
 └──────────────────────┴──────────────────────┴──────────────────────┴────────────────────────┘
 ```
 
-### 1. 👥 Real-Time Collaborative Editor
-- **Conflict-Free Synchronization**: Powered by **Yjs CRDT** over WebSockets.
-- **Monaco Code Editor**: Full VS Code editing experience with syntax highlighting, auto-formatting, and multi-cursor presence.
-- **Session Management**: Role-based access control (`Owner`, `Editor`, `Viewer`) with one-click invite links.
+### 1. 🤖 Prime Agent Studio & RLM Autonomous Engine
+Integrated AI intelligence powered by Recursive Language Model (RLM) architecture and Continual Harness:
+- **Autonomous Self-Healing Pipeline**: Detects compiler/runtime stack traces and automatically isolates, patches, and verifies code faults with 1-click apply.
+- **Interactive Persistent Python REPL**: Direct execution in a persistent Python virtualenv with cross-turn variable tracking.
+- **Continual Harness Memory (`/refine`)**: Persists lessons learned and architectural rules across sessions so the agent compounds knowledge over time.
+- **Subagent Swarms (`rlm.spawn`)**: Coordinates parallel subagents for multi-angle refactoring and security analysis.
+- **CLI & Embedded Hybrid**: Seamlessly binds to the local `prime-agent` daemon or operates via the integrated high-intelligence fallback engine.
 
-### 2. 📝 Multi-Language Compiler & Sandbox
+### 2. 🖥️ Native Desktop Electron Workstation
+- **Frameless Obsidian Glass UI**: Custom cybernetic titlebar with window drag regions, minimize/maximize/close controls, and live telemetry badges.
+- **Direct Local File System Bridge**: Open real directories on your computer (`📁 Open Folder`), scan nested file trees, read and write files with hot-saving (`Ctrl+S`).
+- **Host Hardware Radar**: Live meters for CPU load %, RAM utilization, free memory, running process list with direct process termination (`Kill`), and automated port availability scanning.
+- **System Tray Integration**: Background tray menu for quick workspace switching, system diagnostics, and daemon status.
+
+### 3. ⚡ Multi-Language Compiler & Execution Sandbox
 Compile and run code on-demand with isolated sandbox security:
-- **Supported Languages**: `Python`, `JavaScript`, `TypeScript`, `Java`, `C++`, `Go`, `Rust`, `C#`.
-- **Real-Time Terminal Streaming**: Captures standard output (`stdout`), standard error (`stderr`), and execution runtimes.
+- **Supported Languages**: `Python`, `TypeScript`, `JavaScript`, `Rust`, `Go`, `C++`, `Java`, `C#`.
+- **Instant Execution**: Captures stdout, stderr, execution times in milliseconds, and exit codes.
+- **Shortcuts**: `Ctrl+Enter` to compile and run the active file instantly.
 
-### 3. 🤖 AI Code Assistant Bot
-Integrated AI intelligence for rapid development workflows:
-- **Code Review**: Automatically detects security vulnerabilities, memory leaks, and anti-patterns.
-- **Automated Debugging**: Diagnoses stack traces and suggests drop-in code fixes.
-- **Code Generation & Completion**: Context-aware snippet generator from natural language prompts.
-- **Deep Explanations**: Breaks down complex algorithms and architecture diagrams.
-
-### 4. 🖥️ Host Control & Telemetry System
-- **Real-Time Metrics**: Live tracking of CPU loads, memory utilization, network throughput, and disk health.
-- **Process Manager**: Inspect running system processes with permission-gated process termination (`kill`).
-- **Network Diagnostic**: Automated port availability scanning and network interface analysis.
+### 4. 👥 Real-Time Collaborative Mesh
+- **Conflict-Free State**: Powered by **Yjs CRDT** over Socket.io.
+- **Session Management**: Instant invite links, role-based access control (`Owner`, `Editor`, `Viewer`).
 
 ---
 
 ## 🏗️ System Architecture
 
 ```
-┌───────────────────────────────────────────────────────────────────────────────┐
-│                              CLIENT INTERFACES                                │
-│       Next.js 14 Web App  •  Electron Desktop App  •  Stand-alone Demo        │
-└──────────────────────────────────────┬────────────────────────────────────────┘
-                                       │
-                         WebSocket (Yjs) / REST API
-                                       │
-                                       ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│                         SYNAPSEGRID BACKEND ENGINE                            │
-│  ┌────────────────────────┐  ┌────────────────────────┐  ┌─────────────────┐  │
-│  │   EXPRESS REST API     │  │   SOCKET.IO / YJS      │  │  SYSTEM MONITOR │  │
-│  │   Auth, Compiler, AI   │  │   Multi-Cursor Sync    │  │  Host Telemetry │  │
-│  └───────────┬────────────┘  └───────────┬────────────┘  └────────┬────────┘  │
-└──────────────┼───────────────────────────┼────────────────────────┼───────────┘
-               │                           │                        │
-               ▼                           ▼                        ▼
-┌───────────────────────────┐  ┌────────────────────────┐  ┌────────────────────┐
-│      DATABASE LAYER       │  │   SANDBOX COMPILER     │  │  AI ASSISTANT HUB  │
-│  PostgreSQL (Persistence) │  │   Docker / Subprocess  │  │  OpenAI / Gemini / │
-│  Redis (Real-time State)  │  │   8+ Language Runtimes │  │  Local LLM Routers │
-└───────────────────────────┘  └────────────────────────┘  └────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   CLIENT INTERFACES                                       │
+│    Frameless Electron Desktop App   •   Next.js 16 Static / SSR Web   •   Native IPC      │
+└─────────────────────────────────────────────┬─────────────────────────────────────────────┘
+                                              │
+                    ┌─────────────────────────┴─────────────────────────┐
+                    │                                                   │
+             [Desktop Mode]                                       [Web Cloud Mode]
+         Native Node.js IPC Bridge                             REST API + Socket.io (Yjs)
+                    │                                                   │
+                    ▼                                                   ▼
+┌───────────────────────────────────────┐   ┌───────────────────────────────────────────────┐
+│       SYNAPSE DESKTOP CORE            │   │          SYNAPSEGRID BACKEND ENGINE           │
+│ • Local File System (Tree / Watcher)  │   │ • Resilient Dual Store (Postgres / Memory)   │
+│ • Host Hardware Radar (si / OS)       │   │ • Multi-Language Compiler Sandbox             │
+│ • Direct Process Runner               │   │ • Prime Agent Studio Hub (/api/prime)         │
+│ • Prime Agent Daemon IPC Interface    │   │ • Socket.io Presence & Collaboration          │
+└───────────────────────────────────────┘   └───────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🗂️ Project Structure
+## 📦 Getting Started
 
-```text
-SYNAPSE-GRID/
-├── packages/
-│   ├── backend/               # Express + Socket.io + Compiler + AI Hub
-│   │   ├── src/
-│   │   │   ├── routes/        # Compiler, Assistant, Host Control, Auth routes
-│   │   │   ├── services/      # Compiler execution & AI integration services
-│   │   │   ├── sockets/       # WebSocket synchronization handlers
-│   │   │   └── server.ts      # Server entry point
-│   │   └── package.json
-│   │
-│   ├── frontend/              # Next.js 14 + Tailwind CSS + Monaco Editor UI
-│   │   ├── src/
-│   │   │   ├── pages/         # Dashboard, workspace, and editor views
-│   │   │   ├── lib/           # Yjs provider & socket client
-│   │   │   └── types/
-│   │   └── package.json
-│   │
-│   └── shared/                # Shared TypeScript contracts & schemas
-│       ├── types.ts
-│       └── package.json
-│
-├── src/main/                  # Electron Desktop Shell wrapper
-│   ├── main.ts
-│   └── preload.ts
-│
-├── assets/showcase/           # High-resolution showcase media
-│   └── hero.png
-│
-├── demo.html                  # Standalone interactive browser showcase
-├── mock-server.js             # Lightweight standalone testing backend
-├── docker-compose.yml         # Containerized PostgreSQL, Redis, Backend, Frontend
-├── package.json               # Monorepo root workspace configuration
-└── README.md
-```
+### Prerequisites
+- **Node.js**: v18.0.0+ (Node 20+ or 24+ recommended)
+- **npm**: v9.0.0+
 
----
-
-## ⚡ Quick Start
-
-### 1. Prerequisites
-- **Node.js** 18.0+ & **npm**
-- **Docker & Docker Compose** (optional, for full containerized stack)
-
-### 2. Installation
+### Installation
 
 ```bash
 # Clone the repository
 git clone https://github.com/DeepxkJadhav/SYNAPSE-GRID.git
 cd SYNAPSE-GRID
 
-# Install monorepo dependencies
+# Install dependencies across all workspaces
 npm install
 ```
 
-### 3. Environment Configuration
+### Running Desktop Workstation
 
 ```bash
-cp .env.example .env
+# Run both Backend API and Desktop Electron App
+npm run dev:desktop
+
+# Or run Desktop UI directly
+npm run electron-dev
 ```
 
-```ini
-PORT=5000
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/synapsegrid
-REDIS_URL=redis://localhost:6379
-OPENAI_API_KEY=your_openai_api_key_here
-JWT_SECRET=your_super_secret_jwt_key
-```
-
-### 4. Running with Docker Compose (Recommended)
+### Running Web Application
 
 ```bash
-docker compose up -d
-```
-- **Web Interface**: `http://localhost:3000`
-- **Backend API**: `http://localhost:5000`
-
-### 5. Running in Development Mode
-
-```bash
-# Start backend and frontend simultaneously
+# Starts both Backend (Port 5000) and Frontend (Port 3000)
 npm run dev
 ```
 
-### 6. Interactive Standalone Demo
+### Building Desktop Executable
 
-To test the collaborative interface immediately without external databases:
 ```bash
-node mock-server.js
+# Build complete distribution (NSIS Installer, Portable EXE)
+npm run dist
 ```
-Open `demo.html` in your browser.
 
 ---
 
-## 📡 API Reference Overview
+## 🧪 Testing & Verification
 
-### Compiler Engine
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/compiler/compile` | Compiles source code across 8 languages |
-| `POST` | `/api/compiler/execute` | Executes binary/script with timeout guards |
-| `GET` | `/api/compiler/languages` | Lists available compilers & execution environments |
+SynapseGrid is tested through an automated test suite verifying compilers, host hardware telemetry, Prime Agent RLM services, and API endpoints:
 
-### AI Assistant Bot
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/assistant/review` | Analyzes code for quality, performance, and security |
-| `POST` | `/api/assistant/debug` | Diagnoses runtime bugs & provides fixed snippets |
-| `POST` | `/api/assistant/generate` | Generates full functions from natural language prompts |
-| `POST` | `/api/assistant/explain` | Explains logic and algorithmic complexity |
+```bash
+# Run backend test suite
+npm run test
 
-### Host Telemetry & Control
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/host/system-info` | Hardware, OS, and platform metrics |
-| `GET` | `/api/host/cpu-usage` | Real-time multi-core CPU utilization |
-| `GET` | `/api/host/memory-usage` | Active, allocated, and free RAM |
-| `GET` | `/api/host/processes` | List active processes and PIDs |
-| `POST` | `/api/host/processes/:pid/kill` | Terminate process with permission validation |
-
----
-
-## 👤 Author
-
-**Deepak Jadhav**
-- GitHub: [@DeepxkJadhav](https://github.com/DeepxkJadhav)
-- Repository: [SYNAPSE-GRID](https://github.com/DeepxkJadhav/SYNAPSE-GRID)
+# Run code linting
+npm run lint
+```
 
 ---
 
 ## 📄 License
 
-This project is licensed under the [MIT License](./LICENSE) — Copyright (c) 2026 **Deepak Jadhav**.
+MIT © [Deepak Jadhav](https://github.com/DeepxkJadhav)

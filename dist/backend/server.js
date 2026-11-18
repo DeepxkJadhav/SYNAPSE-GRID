@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.io = exports.httpServer = exports.app = void 0;
+exports.startServer = exports.io = exports.httpServer = exports.app = void 0;
 require("express-async-errors");
 const express_1 = __importDefault(require("express"));
 const http_1 = require("http");
@@ -22,6 +22,7 @@ const files_1 = __importDefault(require("./routes/files"));
 const compiler_1 = __importDefault(require("./routes/compiler"));
 const assistant_1 = __importDefault(require("./routes/assistant"));
 const hostControl_1 = __importDefault(require("./routes/hostControl"));
+const primeAgent_1 = __importDefault(require("./routes/primeAgent"));
 // Import middleware
 const auth_2 = require("./middleware/auth");
 const errorHandler_1 = require("./middleware/errorHandler");
@@ -60,6 +61,7 @@ app.use('/api/files', auth_2.authMiddleware, files_1.default);
 app.use('/api/compiler', compiler_1.default);
 app.use('/api/assistant', assistant_1.default);
 app.use('/api/host', hostControl_1.default);
+app.use('/api/prime', primeAgent_1.default);
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date() });
@@ -101,6 +103,7 @@ const startServer = async () => {
         process.exit(1);
     }
 };
+exports.startServer = startServer;
 // Handle graceful shutdown
 process.on('SIGTERM', () => {
     console.log('SIGTERM received, shutting down gracefully...');
@@ -116,5 +119,7 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+    startServer();
+}
 //# sourceMappingURL=server.js.map

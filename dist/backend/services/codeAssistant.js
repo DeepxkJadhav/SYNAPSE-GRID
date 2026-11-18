@@ -7,8 +7,10 @@ exports.codeAssistantBot = exports.CodeAssistantBot = void 0;
 const openai_1 = __importDefault(require("openai"));
 class CodeAssistantBot {
     constructor(apiKey) {
+        const key = apiKey || process.env.OPENAI_API_KEY || '';
+        this.hasApiKey = !!key && !key.startsWith('sk-synapse');
         this.client = new openai_1.default({
-            apiKey: apiKey || process.env.OPENAI_API_KEY,
+            apiKey: key || 'sk-synapse-offline-key',
         });
     }
     async reviewCode(code, language) {

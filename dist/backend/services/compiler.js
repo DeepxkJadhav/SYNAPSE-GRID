@@ -46,10 +46,11 @@ class CompilerService {
     }
     async compile(code, language) {
         const startTime = Date.now();
+        let filePath = '';
         try {
             const fileName = this.generateFileName(language);
-            const filePath = path.join(this.tempDir, fileName);
-            fs.writeFileSync(filePath, code);
+            filePath = path.join(this.tempDir, fileName);
+            fs.writeFileSync(filePath, code, 'utf-8');
             const result = this.executeCompile(filePath, language);
             const executionTime = Date.now() - startTime;
             return {
@@ -66,13 +67,17 @@ class CompilerService {
                 language,
             };
         }
+        finally {
+            this.safeDelete(filePath);
+        }
     }
     async execute(code, language, input) {
         const startTime = Date.now();
+        let filePath = '';
         try {
             const fileName = this.generateFileName(language);
-            const filePath = path.join(this.tempDir, fileName);
-            fs.writeFileSync(filePath, code);
+            filePath = path.join(this.tempDir, fileName);
+            fs.writeFileSync(filePath, code, 'utf-8');
             const result = this.executeCode(filePath, language, input);
             const executionTime = Date.now() - startTime;
             return {
@@ -89,6 +94,9 @@ class CompilerService {
                 language,
             };
         }
+        finally {
+            this.safeDelete(filePath);
+        }
     }
     generateFileName(language) {
         const extensions = {
@@ -101,32 +109,32 @@ class CompilerService {
             rust: 'rs',
             csharp: 'cs',
         };
-        return `code_${Date.now()}.${extensions[language]}`;
+        return `code_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${extensions[language]}`;
     }
     executeCompile(filePath, language) {
         let command;
         switch (language) {
             case 'typescript':
-                command = `tsc ${filePath} --noEmit`;
+                command = `npx tsc "${filePath}" --noEmit --skipLibCheck`;
                 break;
             case 'java':
-                command = `javac ${filePath}`;
+                command = `javac "${filePath}"`;
                 break;
             case 'cpp':
-                command = `g++ -c ${filePath} -o ${filePath}.o`;
+                command = `g++ -c "${filePath}" -o "${filePath}.o"`;
                 break;
             case 'csharp':
-                command = `csc ${filePath}`;
+                command = `csc "${filePath}"`;
                 break;
             default:
-                return { success: true, output: `${language} does not require compilation` };
+                return { success: true, output: `${language} does not require a pre-compilation step.` };
         }
         try {
-            const output = (0, child_process_1.execSync)(command, { timeout: 30000, encoding: 'utf-8' });
+            const output = (0, child_process_1.execSync)(command, { timeout: 15000, encoding: 'utf-8' });
             return { success: true, output };
         }
         catch (error) {
-            return { success: false, error: error.stderr || error.message };
+            return { success: false, error: error.stderr || error.stdout || error.message };
         }
     }
     executeCode(filePath, language, input) {
@@ -138,45 +146,66 @@ class CompilerService {
             case 'javascript':
                 command = `node "${filePath}"`;
                 break;
+            case 'typescript':
+                command = `npx ts-node --transpile-only "${filePath}"`;
+                break;
             case 'java':
                 const className = path.basename(filePath, '.java');
-                command = `java -cp ${path.dirname(filePath)} ${className}`;
+                command = `java -cp "${path.dirname(filePath)}" ${className}`;
+                break;
+            case 'cpp':
+                const cppOut = path.join(path.dirname(filePath), `cpp_${Date.now()}.exe`);
+                (0, child_process_1.execSync)(`g++ "${filePath}" -o "${cppOut}"`, { timeout: 15000 });
+                command = `"${cppOut}"`;
                 break;
             case 'go':
                 command = `go run "${filePath}"`;
                 break;
             case 'rust':
-                const rustOut = path.join(path.dirname(filePath), 'rust_program');
-                (0, child_process_1.execSync)(`rustc "${filePath}" -o "${rustOut}"`, { timeout: 60000 });
+                const rustOut = path.join(path.dirname(filePath), `rust_${Date.now()}.exe`);
+                (0, child_process_1.execSync)(`rustc "${filePath}" -o "${rustOut}"`, { timeout: 30000 });
                 command = `"${rustOut}"`;
                 break;
             case 'csharp':
-                const csOut = path.join(path.dirname(filePath), 'program.exe');
-                (0, child_process_1.execSync)(`csc /out:${csOut} "${filePath}"`, { timeout: 60000 });
+                const csOut = path.join(path.dirname(filePath), `cs_${Date.now()}.exe`);
+                (0, child_process_1.execSync)(`csc /out:"${csOut}" "${filePath}"`, { timeout: 30000 });
                 command = `"${csOut}"`;
                 break;
             default:
-                return { success: false, error: `Language ${language} is not supported for execution` };
+                return { success: false, error: `Language ${language} is not supported for execution.` };
         }
         try {
             const stdout = (0, child_process_1.execSync)(command, {
-                timeout: 30000,
+                timeout: 15000,
                 encoding: 'utf-8',
                 input: input,
             });
             return { success: true, stdout };
         }
         catch (error) {
-            return { success: false, stderr: error.stderr || error.message, stdout: error.stdout };
+            return {
+                success: false,
+                stderr: error.stderr || error.stdout || error.message,
+                stdout: error.stdout,
+            };
         }
+    }
+    safeDelete(filePath) {
+        try {
+            if (filePath && fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+        catch { }
     }
     async cleanup() {
         try {
-            const files = fs.readdirSync(this.tempDir);
-            files.forEach((file) => {
-                const filePath = path.join(this.tempDir, file);
-                fs.unlinkSync(filePath);
-            });
+            if (fs.existsSync(this.tempDir)) {
+                const files = fs.readdirSync(this.tempDir);
+                files.forEach((file) => {
+                    this.safeDelete(path.join(this.tempDir, file));
+                });
+            }
         }
         catch (error) {
             console.error('Cleanup error:', error);

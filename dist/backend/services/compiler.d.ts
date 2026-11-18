@@ -18,6 +18,7 @@ export declare class CompilerService {
     private generateFileName;
     private executeCompile;
     private executeCode;
+    private safeDelete;
     cleanup(): Promise<void>;
 }
 export declare const compilerService: CompilerService;

@@ -379,3 +379,103 @@ export enum SocketEventType {
   // Errors
   ERROR = 'error',
 }
+
+// ============== Prime Agent & RLM Architecture ==============
+
+export interface PrimeAgentStatus {
+  available: boolean;
+  version?: string;
+  daemonActive: boolean;
+  activeAgentsCount: number;
+  replKernelReady: boolean;
+  kernelVenvPath?: string;
+  mode: 'cli' | 'embedded';
+}
+
+export interface PrimeAgentSessionInfo {
+  id: string;
+  name: string;
+  status: 'active' | 'idle' | 'stopped' | 'completed';
+  createdAt: string;
+  lastActivityAt: string;
+  tokensUsed?: number;
+  goal?: string;
+}
+
+export interface PrimeAgentExecuteRequest {
+  prompt: string;
+  contextCode?: string;
+  activeLanguage?: string;
+  filePath?: string;
+  autonomous?: boolean;
+  gateCommand?: string;
+  sessionId?: string;
+}
+
+export interface PrimeAgentExecuteResult {
+  success: boolean;
+  output: string;
+  suggestedPatch?: string;
+  affectedFiles?: string[];
+  executionTimeMs: number;
+  agentSessionId?: string;
+  refinementLessons?: string[];
+}
+
+export interface PrimeReplRequest {
+  command: string;
+  sessionId?: string;
+}
+
+export interface PrimeReplResult {
+  output: string;
+  variables: Record<string, string>;
+  error?: string;
+  executionTimeMs: number;
+}
+
+export interface PrimeSelfHealingRequest {
+  code: string;
+  language: string;
+  errorTrace: string;
+  commandExecuted?: string;
+}
+
+export interface PrimeSelfHealingResult {
+  success: boolean;
+  diagnostics: string;
+  fixedCode: string;
+  explanation: string;
+  diffSummary: string;
+}
+
+// ============== Desktop Native IPC Types ==============
+
+export interface DesktopFsNode {
+  name: string;
+  path: string;
+  isDirectory: boolean;
+  size?: number;
+  children?: DesktopFsNode[];
+}
+
+export interface DesktopHostStats {
+  hostname: string;
+  platform: string;
+  uptimeSeconds: number;
+  cpuModel: string;
+  cpuCores: number;
+  cpuUsagePercent: number;
+  ramTotalBytes: number;
+  ramUsedBytes: number;
+  ramFreeBytes: number;
+  ramUsagePercent: number;
+  diskUsagePercent: number;
+  topProcesses: {
+    pid: number;
+    name: string;
+    cpu: number;
+    memory: number;
+  }[];
+}
+

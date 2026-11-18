@@ -19,6 +19,7 @@ import fileRoutes from './routes/files';
 import compilerRoutes from './routes/compiler';
 import assistantRoutes from './routes/assistant';
 import hostControlRoutes from './routes/hostControl';
+import primeAgentRoutes from './routes/primeAgent';
 
 // Import middleware
 import { authMiddleware } from './middleware/auth';
@@ -60,6 +61,7 @@ app.use('/api/files', authMiddleware, fileRoutes);
 app.use('/api/compiler', compilerRoutes);
 app.use('/api/assistant', assistantRoutes);
 app.use('/api/host', hostControlRoutes);
+app.use('/api/prime', primeAgentRoutes);
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
@@ -127,6 +129,8 @@ process.on('SIGINT', () => {
   });
 });
 
-startServer();
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}
 
-export { app, httpServer, io };
+export { app, httpServer, io, startServer };
