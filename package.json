@@ -15,13 +15,14 @@
   "scripts": {
     "dev": "concurrently \"npm run dev -w @synapse/backend\" \"npm run dev -w @synapse/frontend\"",
     "dev:desktop": "concurrently \"npm run dev -w @synapse/backend\" \"npm run dev -w @synapse/frontend\" \"electron .\"",
-    "build": "npm run build -w @synapse/backend && npm run build -w @synapse/frontend && npm run build:desktop",
+    "build": "npm run build -w @synapse/shared && npm run build -w @synapse/backend && npm run build -w @synapse/frontend && npm run build:desktop",
     "build:desktop": "node -e \"const fs=require('fs');fs.rmSync('dist/main',{recursive:true,force:true});\" && tsc -p tsconfig.main.json",
     "electron-dev": "electron .",
     "electron-build": "npm run build && electron-builder --win --publish never",
     "dist": "npm run build && electron-builder --win msi nsis",
     "pack": "electron-builder --dir",
     "test": "npm run test -w @synapse/backend",
+    "test:desktop": "node scripts/test-desktop-launch.js",
     "lint": "npm run lint -w @synapse/backend && npm run lint -w @synapse/frontend",
     "clean": "rm -rf packages/*/dist packages/*/node_modules node_modules dist packages/frontend/out"
   },
@@ -40,9 +41,8 @@
     "appId": "com.synapsegrid.app",
     "productName": "SynapseGrid",
     "files": [
-      "dist/main/**/*",
+      "dist/**/*",
       "packages/frontend/out/**/*",
-      "packages/backend/dist/**/*",
       "node_modules/**/*",
       "package.json"
     ],

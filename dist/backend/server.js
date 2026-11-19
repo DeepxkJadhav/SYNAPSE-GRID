@@ -36,10 +36,23 @@ exports.httpServer = httpServer;
 const PORT = process.env.BACKEND_PORT || 5000;
 // ============== MIDDLEWARE ==============
 app.use((0, helmet_1.default)());
+const isAllowedOrigin = (origin) => {
+    if (!origin)
+        return true;
+    if (origin.startsWith('http://localhost') ||
+        origin.startsWith('http://127.0.0.1') ||
+        origin.startsWith('file://')) {
+        return true;
+    }
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+        return true;
+    }
+    return false;
+};
 app.use((0, cors_1.default)({
-    origin: process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_URL
-        : 'http://localhost:3000',
+    origin: (origin, callback) => {
+        callback(null, isAllowedOrigin(origin));
+    },
     credentials: true
 }));
 app.use(express_1.default.json());
@@ -47,9 +60,9 @@ app.use(express_1.default.urlencoded({ extended: true }));
 // ============== SOCKET.IO ==============
 const io = new socket_io_1.Server(httpServer, {
     cors: {
-        origin: process.env.NODE_ENV === 'production'
-            ? process.env.FRONTEND_URL
-            : 'http://localhost:3000',
+        origin: (origin, callback) => {
+            callback(null, isAllowedOrigin(origin));
+        },
         credentials: true
     }
 });

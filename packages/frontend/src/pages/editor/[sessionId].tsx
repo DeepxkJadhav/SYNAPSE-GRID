@@ -440,21 +440,24 @@ fn main() {
         </div>
 
         {/* Window Controls (Electron) */}
-        <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
+        <div className="flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <Link href="/" className="px-2 py-0.5 rounded text-[11px] text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+            ⌂ Home
+          </Link>
           {isDesktop ? (
-            <div className="flex items-center">
-              <button onClick={handleMinimize} className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded">
+            <div className="flex items-center ml-2 border-l border-slate-800 pl-2">
+              <button onClick={handleMinimize} title="Minimize" className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded">
                 🗕
               </button>
-              <button onClick={handleMaximize} className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded">
+              <button onClick={handleMaximize} title="Maximize" className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 rounded">
                 {windowMaximized ? '🗗' : '🗖'}
               </button>
-              <button onClick={handleClose} className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-white hover:bg-rose-900/60 rounded">
+              <button onClick={handleClose} title="Close" className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-white hover:bg-rose-900/60 rounded">
                 ✕
               </button>
             </div>
           ) : (
-            <Link href="/dashboard" className="text-slate-400 hover:text-white">
+            <Link href="/dashboard" className="text-slate-400 hover:text-white text-[11px]">
               Dashboard →
             </Link>
           )}

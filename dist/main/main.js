@@ -42,15 +42,158 @@ const util_1 = require("util");
 const fs = __importStar(require("fs"));
 const os = __importStar(require("os"));
 const net = __importStar(require("net"));
+const http = __importStar(require("http"));
+// Hardware acceleration crashes on Windows (D3D11 / GPU process exit -1073740791)
+electron_1.app.disableHardwareAcceleration();
+electron_1.app.commandLine.appendSwitch('disable-gpu');
+electron_1.app.commandLine.appendSwitch('disable-software-rasterizer');
 const execAsync = (0, util_1.promisify)(child_process_1.exec);
 let mainWindow = null;
 exports.mainWindow = mainWindow;
 let backendProcess = null;
 exports.backendProcess = backendProcess;
 let tray = null;
+let staticServer = null;
+let staticPort = 0;
 const isDevelopment = typeof isDev === 'boolean' ? isDev : (isDev?.default ?? false);
+// ============== EMBEDDED STATIC UI SERVER ==============
+const MIME_TYPES = {
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'application/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.woff': 'font/woff',
+    '.woff2': 'font/woff2',
+    '.ttf': 'font/ttf',
+    '.txt': 'text/plain; charset=utf-8',
+};
+const getFrontendOutDir = () => {
+    const candidates = [
+        path.join(__dirname, '../../packages/frontend/out'),
+        path.join(electron_1.app.getAppPath(), 'packages', 'frontend', 'out'),
+        path.join(process.resourcesPath || '', 'frontend', 'out'),
+        path.join(electron_1.app.getAppPath(), 'out'),
+        path.join(__dirname, '../frontend/out'),
+    ];
+    return candidates.find((p) => fs.existsSync(p)) || candidates[0];
+};
+const startStaticServer = async () => {
+    return new Promise((resolve, reject) => {
+        const frontendDir = getFrontendOutDir();
+        staticServer = http.createServer((req, res) => {
+            try {
+                const parsedUrl = new URL(req.url || '/', 'http://127.0.0.1');
+                let pathname = decodeURIComponent(parsedUrl.pathname);
+                // Security: prevent directory traversal
+                let filePath = path.join(frontendDir, pathname);
+                if (!filePath.startsWith(frontendDir)) {
+                    res.writeHead(403);
+                    res.end('Forbidden');
+                    return;
+                }
+                // Check if path is a directory
+                if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+                    filePath = path.join(filePath, 'index.html');
+                }
+                else if (!fs.existsSync(filePath)) {
+                    // If file not found, check Next.js static routing conventions
+                    if (fs.existsSync(`${filePath}.html`)) {
+                        filePath = `${filePath}.html`;
+                    }
+                    else if (fs.existsSync(path.join(filePath, 'index.html'))) {
+                        filePath = path.join(filePath, 'index.html');
+                    }
+                    else if (pathname.startsWith('/editor/')) {
+                        // Dynamic [sessionId] route: /editor/<id> -> /editor/[sessionId]/index.html
+                        const editorDynamicPath = path.join(frontendDir, 'editor', '[sessionId]', 'index.html');
+                        if (fs.existsSync(editorDynamicPath)) {
+                            filePath = editorDynamicPath;
+                        }
+                    }
+                }
+                if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+                    const fallback404 = path.join(frontendDir, '404.html');
+                    if (fs.existsSync(fallback404)) {
+                        filePath = fallback404;
+                    }
+                    else {
+                        res.writeHead(404);
+                        res.end('Not Found');
+                        return;
+                    }
+                }
+                const ext = path.extname(filePath).toLowerCase();
+                const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+                const stream = fs.createReadStream(filePath);
+                res.writeHead(200, {
+                    'Content-Type': contentType,
+                    'Cache-Control': 'no-cache',
+                    'Access-Control-Allow-Origin': '*',
+                });
+                stream.pipe(res);
+            }
+            catch (err) {
+                res.writeHead(500);
+                res.end(`Internal Server Error: ${err?.message}`);
+            }
+        });
+        staticServer.listen(0, '127.0.0.1', () => {
+            const addr = staticServer.address();
+            if (addr && typeof addr === 'object') {
+                staticPort = addr.port;
+                console.log(`[Synapse Desktop] Embedded static UI server listening on http://127.0.0.1:${staticPort}`);
+                resolve(staticPort);
+            }
+            else {
+                reject(new Error('Failed to obtain server address'));
+            }
+        });
+        staticServer.on('error', (err) => {
+            console.error('[Synapse Desktop] Embedded static UI server error:', err);
+            reject(err);
+        });
+    });
+};
+const isPortResponding = (port, host = '127.0.0.1', timeoutMs = 300) => {
+    return new Promise((resolve) => {
+        const socket = new net.Socket();
+        socket.setTimeout(timeoutMs);
+        socket.once('connect', () => {
+            socket.destroy();
+            resolve(true);
+        });
+        socket.once('timeout', () => {
+            socket.destroy();
+            resolve(false);
+        });
+        socket.once('error', () => {
+            socket.destroy();
+            resolve(false);
+        });
+        socket.connect(port, host);
+    });
+};
+const getAppIcon = () => {
+    const icoCandidate = path.join(__dirname, '../../assets/icon.ico');
+    const pngCandidate = path.join(__dirname, '../../assets/icon.png');
+    const heroCandidate = path.join(__dirname, '../../assets/showcase/hero.png');
+    if (fs.existsSync(icoCandidate))
+        return icoCandidate;
+    if (fs.existsSync(pngCandidate))
+        return pngCandidate;
+    if (fs.existsSync(heroCandidate))
+        return heroCandidate;
+    return undefined;
+};
 // ============== WINDOW CREATION ==============
-const createWindow = () => {
+const createWindow = async () => {
+    const appIcon = getAppIcon();
     exports.mainWindow = mainWindow = new electron_1.BrowserWindow({
         width: 1440,
         height: 920,
@@ -65,42 +208,53 @@ const createWindow = () => {
             contextIsolation: true,
             webSecurity: true,
         },
-        icon: path.join(__dirname, '../../assets/icon.ico'),
+        ...(appIcon ? { icon: appIcon } : {}),
     });
-    const startURL = isDevelopment
-        ? 'http://localhost:3000'
-        : `file://${path.join(__dirname, '../../packages/frontend/out/index.html')}`;
-    mainWindow.loadURL(startURL).catch((err) => {
-        console.warn(`[Synapse Desktop] Failed to load startURL (${startURL}):`, err.message);
-        if (isDevelopment) {
-            setTimeout(() => {
-                mainWindow?.loadURL(startURL).catch(() => { });
-            }, 2000);
+    // Check if Next dev server is actively running on port 3000
+    let targetUrl = `http://127.0.0.1:${staticPort}/editor/session-desktop`;
+    if (isDevelopment) {
+        const devServerUp = await isPortResponding(3000);
+        if (devServerUp) {
+            targetUrl = 'http://localhost:3000/editor/session-desktop';
+            console.log('[Synapse Desktop] Connected to live Next.js development server at http://localhost:3000');
+        }
+        else {
+            console.log(`[Synapse Desktop] Port 3000 not responding. Using embedded static server: ${targetUrl}`);
+        }
+    }
+    console.log(`[Synapse Desktop] Loading URL: ${targetUrl}`);
+    mainWindow.loadURL(targetUrl).catch((err) => {
+        console.warn(`[Synapse Desktop] Failed to load target URL (${targetUrl}):`, err.message);
+        if (targetUrl !== `http://127.0.0.1:${staticPort}/`) {
+            mainWindow?.loadURL(`http://127.0.0.1:${staticPort}/`).catch(() => { });
         }
     });
     mainWindow.once('ready-to-show', () => {
         mainWindow?.show();
         mainWindow?.focus();
     });
-    if (isDevelopment) {
-        mainWindow.webContents.openDevTools({ mode: 'detach' });
-    }
+    // Safety fallback: ensure window is displayed even if ready-to-show is delayed
+    setTimeout(() => {
+        if (mainWindow && !mainWindow.isVisible()) {
+            mainWindow.show();
+            mainWindow.focus();
+        }
+    }, 1200);
     mainWindow.on('closed', () => {
         exports.mainWindow = mainWindow = null;
     });
 };
 // ============== BACKEND SERVER LIFECYCLE ==============
 const getBackendPath = () => {
-    if (isDevelopment) {
-        return path.join(__dirname, '../../packages/backend/dist/server.js');
-    }
-    const prodCandidates = [
-        path.join(process.resourcesPath || '', 'backend', 'dist', 'server.js'),
-        path.join(electron_1.app.getAppPath(), 'dist', 'backend', 'server.js'),
-        path.join(electron_1.app.getAppPath(), 'packages', 'backend', 'dist', 'server.js'),
+    const candidates = [
         path.join(__dirname, '../backend/server.js'),
+        path.join(electron_1.app.getAppPath(), 'dist', 'backend', 'server.js'),
+        path.join(process.resourcesPath || '', 'backend', 'dist', 'server.js'),
+        path.join(__dirname, '../../dist/backend/server.js'),
+        path.join(__dirname, '../../packages/backend/dist/server.js'),
+        path.join(electron_1.app.getAppPath(), 'packages', 'backend', 'dist', 'server.js'),
     ];
-    return prodCandidates.find((p) => fs.existsSync(p)) || prodCandidates[0];
+    return candidates.find((p) => fs.existsSync(p)) || candidates[0];
 };
 const startBackendServer = () => {
     const backendPath = getBackendPath();
@@ -136,9 +290,20 @@ const startBackendServer = () => {
     }
 };
 // ============== SYSTEM TRAY ==============
+const getTrayIcon = () => {
+    const icoCandidate = path.join(__dirname, '../../assets/icon.ico');
+    const pngCandidate = path.join(__dirname, '../../assets/icon.png');
+    if (fs.existsSync(icoCandidate))
+        return icoCandidate;
+    if (fs.existsSync(pngCandidate))
+        return pngCandidate;
+    return undefined;
+};
 const createTray = () => {
-    const iconPath = path.join(__dirname, '../../assets/icon.ico');
-    if (fs.existsSync(iconPath)) {
+    const iconPath = getTrayIcon();
+    if (!iconPath || !fs.existsSync(iconPath))
+        return;
+    try {
         const icon = electron_1.nativeImage.createFromPath(iconPath);
         tray = new electron_1.Tray(icon);
         const contextMenu = electron_1.Menu.buildFromTemplate([
@@ -187,6 +352,9 @@ const createTray = () => {
         tray.on('double-click', () => {
             mainWindow?.show();
         });
+    }
+    catch (err) {
+        console.warn('[Synapse Desktop] Failed to initialize tray:', err);
     }
 };
 // ============== NATIVE IPC HANDLERS ==============
@@ -510,9 +678,15 @@ electron_1.ipcMain.handle('show-message-box', async (_event, options) => {
     return electron_1.dialog.showMessageBox(mainWindow, options);
 });
 // ============== APP EVENT HANDLERS ==============
-electron_1.app.on('ready', () => {
+electron_1.app.on('ready', async () => {
+    try {
+        await startStaticServer();
+    }
+    catch (err) {
+        console.error('[Synapse Desktop] Failed to initialize embedded static server:', err);
+    }
     startBackendServer();
-    createWindow();
+    await createWindow();
     createTray();
 });
 electron_1.app.on('window-all-closed', () => {
@@ -520,15 +694,21 @@ electron_1.app.on('window-all-closed', () => {
         electron_1.app.quit();
     }
 });
-electron_1.app.on('activate', () => {
+electron_1.app.on('activate', async () => {
     if (mainWindow === null) {
-        createWindow();
+        await createWindow();
     }
 });
 electron_1.app.on('before-quit', () => {
     if (backendProcess) {
         try {
             backendProcess.kill();
+        }
+        catch { }
+    }
+    if (staticServer) {
+        try {
+            staticServer.close();
         }
         catch { }
     }

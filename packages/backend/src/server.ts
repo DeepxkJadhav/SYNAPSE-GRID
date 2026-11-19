@@ -35,10 +35,26 @@ const PORT = process.env.BACKEND_PORT || 5000;
 
 // ============== MIDDLEWARE ==============
 app.use(helmet());
+
+const isAllowedOrigin = (origin: string | undefined): boolean => {
+  if (!origin) return true;
+  if (
+    origin.startsWith('http://localhost') ||
+    origin.startsWith('http://127.0.0.1') ||
+    origin.startsWith('file://')
+  ) {
+    return true;
+  }
+  if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+    return true;
+  }
+  return false;
+};
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
-    : 'http://localhost:3000',
+  origin: (origin, callback) => {
+    callback(null, isAllowedOrigin(origin));
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -47,9 +63,9 @@ app.use(express.urlencoded({ extended: true }));
 // ============== SOCKET.IO ==============
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: process.env.NODE_ENV === 'production'
-      ? process.env.FRONTEND_URL
-      : 'http://localhost:3000',
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      callback(null, isAllowedOrigin(origin));
+    },
     credentials: true
   }
 });

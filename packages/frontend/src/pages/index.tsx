@@ -55,16 +55,22 @@ export default function Home() {
 
           <div className="flex gap-5 justify-center flex-wrap">
             <Link
+              href="/editor/session-desktop"
+              className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-semibold hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-600/30 hover:scale-[1.02] flex items-center gap-2"
+            >
+              <span>⚡ Launch Workstation</span>
+            </Link>
+            <Link
               href="/register"
-              className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-semibold hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-600/30 hover:scale-[1.02]"
+              className="px-8 py-4 bg-indigo-950/40 text-indigo-300 border border-indigo-900/40 rounded-2xl font-semibold hover:bg-indigo-950/60 hover:text-white transition-all hover:scale-[1.02]"
             >
               Get Started Free
             </Link>
             <Link
               href="/login"
-              className="px-8 py-4 bg-indigo-950/40 text-indigo-300 border border-indigo-900/40 rounded-2xl font-semibold hover:bg-indigo-950/60 hover:text-white transition-all hover:scale-[1.02]"
+              className="px-8 py-4 bg-slate-900/40 text-slate-400 border border-slate-800/40 rounded-2xl font-semibold hover:bg-slate-900/60 hover:text-white transition-all hover:scale-[1.02]"
             >
-              Access Workspace
+              Access Cloud
             </Link>
           </div>
         </div>
