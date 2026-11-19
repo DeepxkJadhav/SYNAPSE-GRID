@@ -160,23 +160,33 @@ const startStaticServer = async () => {
         });
     });
 };
-const isPortResponding = (port, host = '127.0.0.1', timeoutMs = 300) => {
+const isSynapseDevServerActive = async (timeoutMs = 400) => {
+    if (process.env.SYNAPSE_USE_DEV_SERVER === '1')
+        return true;
     return new Promise((resolve) => {
-        const socket = new net.Socket();
-        socket.setTimeout(timeoutMs);
-        socket.once('connect', () => {
-            socket.destroy();
-            resolve(true);
-        });
-        socket.once('timeout', () => {
-            socket.destroy();
+        try {
+            const req = http.get('http://localhost:3000/', { timeout: timeoutMs }, (res) => {
+                let body = '';
+                res.on('data', (chunk) => {
+                    body += chunk.toString();
+                    if (body.includes('SYNAPSE') || body.includes('SynapseGrid')) {
+                        req.destroy();
+                        resolve(true);
+                    }
+                });
+                res.on('end', () => {
+                    resolve(body.includes('SYNAPSE') || body.includes('SynapseGrid'));
+                });
+            });
+            req.on('error', () => resolve(false));
+            req.on('timeout', () => {
+                req.destroy();
+                resolve(false);
+            });
+        }
+        catch {
             resolve(false);
-        });
-        socket.once('error', () => {
-            socket.destroy();
-            resolve(false);
-        });
-        socket.connect(port, host);
+        }
     });
 };
 const getAppIcon = () => {
@@ -210,16 +220,16 @@ const createWindow = async () => {
         },
         ...(appIcon ? { icon: appIcon } : {}),
     });
-    // Check if Next dev server is actively running on port 3000
+    // Check if Synapse Next dev server is actively running on port 3000
     let targetUrl = `http://127.0.0.1:${staticPort}/editor/session-desktop`;
     if (isDevelopment) {
-        const devServerUp = await isPortResponding(3000);
+        const devServerUp = await isSynapseDevServerActive();
         if (devServerUp) {
             targetUrl = 'http://localhost:3000/editor/session-desktop';
             console.log('[Synapse Desktop] Connected to live Next.js development server at http://localhost:3000');
         }
         else {
-            console.log(`[Synapse Desktop] Port 3000 not responding. Using embedded static server: ${targetUrl}`);
+            console.log(`[Synapse Desktop] Using embedded static UI server: ${targetUrl}`);
         }
     }
     console.log(`[Synapse Desktop] Loading URL: ${targetUrl}`);
