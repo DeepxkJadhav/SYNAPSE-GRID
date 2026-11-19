@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import apiClient from '@/lib/api';
 import { useAuthStore } from '@/lib/authStore';
 import {
@@ -12,7 +13,9 @@ import {
   Save,
   FolderOpen,
   Folder,
+  FolderPlus,
   FileCode,
+  FilePlus,
   FileText,
   Activity,
   Layers,
@@ -32,10 +35,29 @@ import {
   Trash2,
   Copy,
   ChevronRight,
+  ChevronDown,
   Brain,
   HelpCircle,
   Hash,
+  RefreshCw,
+  Plus,
+  Wand2,
+  ShieldCheck,
+  Command,
 } from 'lucide-react';
+
+// Dynamic import of Monaco Editor with SSR disabled
+const MonacoEditor = dynamic(() => import('@monaco-editor/react').then((mod) => mod.default), {
+  ssr: false,
+  loading: () => (
+    <div className="flex-1 flex items-center justify-center bg-[#030612] text-slate-500 font-mono text-xs">
+      <div className="flex items-center gap-2.5">
+        <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
+        <span>Initializing Monaco Cybernetic Kernel...</span>
+      </div>
+    </div>
+  ),
+});
 
 interface FileItem {
   id: string;
@@ -76,11 +98,22 @@ export default function CyberneticEditor() {
   const [activeTab, setActiveTab] = useState<'editor' | 'prime' | 'host' | 'repl'>('editor');
   const [activeSidebarView, setActiveSidebarView] = useState<'explorer' | 'search' | 'prime' | 'telemetry' | 'memory'>('explorer');
 
+  // Command Palette
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [commandPaletteQuery, setCommandPaletteQuery] = useState('');
+
+  // Modals for New File / New Folder
+  const [isNewFileModalOpen, setIsNewFileModalOpen] = useState(false);
+  const [newFileNameInput, setNewFileNameInput] = useState('');
+  const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
+  const [newFolderNameInput, setNewFolderNameInput] = useState('');
+
   // Editor & Workspace State
   const [workspaceName, setWorkspaceName] = useState<string>('SYNAPSE SANDBOX');
   const [workspacePath, setWorkspacePath] = useState<string>('');
   const [openFiles, setOpenFiles] = useState<string[]>(['main.ts', 'server.py', 'index.rs']);
   const [activeFile, setActiveFile] = useState<string>('main.ts');
+  const [dirtyFiles, setDirtyFiles] = useState<Set<string>>(new Set());
   const [fileSearchQuery, setFileSearchQuery] = useState<string>('');
   const [fileContents, setFileContents] = useState<Record<string, string>>({
     'main.ts': `// SynapseGrid Cybernetic Runtime
@@ -145,7 +178,7 @@ fn main() {
   const [terminalLogs, setTerminalLogs] = useState<TerminalLog[]>([
     { type: 'sys', text: 'SynapseGrid Cybernetic Workstation v1.2 RLM initialized.' },
     { type: 'ok', text: 'Dual-Engine active: Standalone Local IPC + Yjs Collaboration Mesh.' },
-    { type: 'info', text: 'Press Ctrl+Enter to compile & run code. Press Ctrl+S to save buffer.' },
+    { type: 'info', text: 'Monaco Editor active. Press Ctrl+Enter to compile & run. Press Ctrl+K for Command Palette.' },
   ]);
 
   // Prime Agent State
@@ -159,6 +192,8 @@ fn main() {
   const [primeOutput, setPrimeOutput] = useState<string>('');
   const [suggestedPatch, setSuggestedPatch] = useState<string | null>(null);
   const [replInput, setReplInput] = useState('x = 42');
+  const [replHistory, setReplHistory] = useState<string[]>([]);
+  const [replHistoryIndex, setReplHistoryIndex] = useState<number>(-1);
   const [replLogs, setReplLogs] = useState<Array<{ cmd: string; out: string }>>([
     { cmd: 'prime_version', out: '"0.10.4-rlm"' },
   ]);
@@ -168,6 +203,7 @@ fn main() {
     'Isolate compiler temp directories per session to prevent race conditions.',
     'Maintain continuous telemetry heartbeat for early deadlock detection.',
   ]);
+  const [newLessonInput, setNewLessonInput] = useState('');
 
   // Host Telemetry State
   const [hostStats, setHostStats] = useState<HostStats | null>(null);
@@ -178,6 +214,7 @@ fn main() {
     { port: 6379, status: 'closed' },
     { port: 8080, status: 'closed' },
   ]);
+  const [isScanningPorts, setIsScanningPorts] = useState(false);
 
   // Native File Tree
   const [nativeTree, setNativeTree] = useState<FileItem[]>([]);
@@ -211,6 +248,27 @@ fn main() {
       }).catch(() => {});
     }
   }, []);
+
+  // Keyboard Shortcuts (Ctrl+S, Ctrl+Enter, Ctrl+K / Ctrl+Shift+P)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSaveActiveFile();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleRunCode();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || (e.shiftKey && e.key === 'P'))) {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      } else if (e.key === 'Escape' && isCommandPaletteOpen) {
+        setIsCommandPaletteOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeFile, fileContents, isCommandPaletteOpen]);
 
   // Update selected language when active file changes
   useEffect(() => {
@@ -254,6 +312,61 @@ fn main() {
     }
   };
 
+  // Refresh tree
+  const handleRefreshTree = async () => {
+    if (isDesktop && workspacePath) {
+      try {
+        const tree = await (window as any).synapseDesktop.fs.readTree(workspacePath);
+        setNativeTree(tree);
+        setTerminalLogs((prev) => [...prev, { type: 'ok', text: 'Refreshed workspace file tree.' }]);
+      } catch (err: any) {
+        setTerminalLogs((prev) => [...prev, { type: 'err', text: `Refresh error: ${err.message}` }]);
+      }
+    }
+  };
+
+  // Create New File
+  const handleCreateFile = async () => {
+    if (!newFileNameInput.trim()) return;
+    const filename = newFileNameInput.trim();
+    setIsNewFileModalOpen(false);
+    setNewFileNameInput('');
+
+    if (isDesktop && workspacePath) {
+      try {
+        const fullPath = `${workspacePath}/${filename}`;
+        await (window as any).synapseDesktop.fs.createFile(fullPath, `// ${filename}\n`);
+        await handleRefreshTree();
+      } catch (err: any) {
+        setTerminalLogs((prev) => [...prev, { type: 'err', text: `Create file error: ${err.message}` }]);
+      }
+    }
+
+    setFileContents((prev) => ({ ...prev, [filename]: `// ${filename}\n` }));
+    if (!openFiles.includes(filename)) setOpenFiles((prev) => [...prev, filename]);
+    setActiveFile(filename);
+    setTerminalLogs((prev) => [...prev, { type: 'ok', text: `Created file: ${filename}` }]);
+  };
+
+  // Create New Folder
+  const handleCreateFolder = async () => {
+    if (!newFolderNameInput.trim()) return;
+    const folderName = newFolderNameInput.trim();
+    setIsNewFolderModalOpen(false);
+    setNewFolderNameInput('');
+
+    if (isDesktop && workspacePath) {
+      try {
+        const fullPath = `${workspacePath}/${folderName}`;
+        await (window as any).synapseDesktop.fs.createFolder(fullPath);
+        await handleRefreshTree();
+        setTerminalLogs((prev) => [...prev, { type: 'ok', text: `Created directory: ${folderName}` }]);
+      } catch (err: any) {
+        setTerminalLogs((prev) => [...prev, { type: 'err', text: `Create folder error: ${err.message}` }]);
+      }
+    }
+  };
+
   // Select File to Read
   const handleSelectFile = async (item: FileItem) => {
     if (item.isDirectory) return;
@@ -273,6 +386,32 @@ fn main() {
     }
   };
 
+  // Delete file
+  const handleDeleteFile = async (item: FileItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Are you sure you want to delete ${item.name}?`)) {
+      if (isDesktop && item.path) {
+        try {
+          await (window as any).synapseDesktop.fs.delete(item.path);
+          await handleRefreshTree();
+        } catch (err: any) {
+          setTerminalLogs((prev) => [...prev, { type: 'err', text: `Delete error: ${err.message}` }]);
+        }
+      }
+      setFileContents((prev) => {
+        const next = { ...prev };
+        delete next[item.name];
+        return next;
+      });
+      setOpenFiles((prev) => prev.filter((f) => f !== item.name));
+      if (activeFile === item.name) {
+        const remaining = openFiles.filter((f) => f !== item.name);
+        if (remaining.length > 0) setActiveFile(remaining[0]);
+      }
+      setTerminalLogs((prev) => [...prev, { type: 'info', text: `Deleted: ${item.name}` }]);
+    }
+  };
+
   // Save Active File
   const handleSaveActiveFile = async () => {
     const currentCode = fileContents[activeFile] || '';
@@ -280,11 +419,21 @@ fn main() {
       try {
         const fullPath = `${workspacePath}/${activeFile}`;
         await (window as any).synapseDesktop.fs.writeFile(fullPath, currentCode);
+        setDirtyFiles((prev) => {
+          const next = new Set(prev);
+          next.delete(activeFile);
+          return next;
+        });
         setTerminalLogs((prev) => [...prev, { type: 'ok', text: `Saved file: ${activeFile}` }]);
       } catch (err: any) {
         setTerminalLogs((prev) => [...prev, { type: 'err', text: `Save error: ${err.message}` }]);
       }
     } else {
+      setDirtyFiles((prev) => {
+        const next = new Set(prev);
+        next.delete(activeFile);
+        return next;
+      });
       setTerminalLogs((prev) => [...prev, { type: 'ok', text: `Saved ${activeFile} to active memory buffer.` }]);
     }
   };
@@ -404,6 +553,7 @@ fn main() {
     if (suggestedPatch) {
       setFileContents((prev) => ({ ...prev, [activeFile]: suggestedPatch }));
       setSuggestedPatch(null);
+      setDirtyFiles((prev) => new Set(prev).add(activeFile));
       setTerminalLogs((prev) => [
         ...prev,
         { type: 'ok', text: `Applied Prime Agent patch to ${activeFile}` },
@@ -416,6 +566,8 @@ fn main() {
     e.preventDefault();
     if (!replInput.trim()) return;
     const cmd = replInput;
+    setReplHistory((prev) => [...prev, cmd]);
+    setReplHistoryIndex(-1);
     setReplInput('');
 
     try {
@@ -434,7 +586,38 @@ fn main() {
         ...prev,
         { type: res.success ? 'ok' : 'err', text: res.message },
       ]);
+      const stats = await (window as any).synapseDesktop.host.getStats();
+      setHostStats(stats);
     }
+  };
+
+  // Live Port Scanner Trigger
+  const handleScanPorts = async () => {
+    setIsScanningPorts(true);
+    const targetPorts = [3000, 5000, 5432, 6379, 8080];
+    try {
+      if (isDesktop) {
+        const results = await (window as any).synapseDesktop.host.scanPorts(targetPorts);
+        setScannedPorts(results);
+      } else {
+        // Fallback simulation for web
+        setScannedPorts(targetPorts.map((p) => ({ port: p, status: p === 5000 || p === 3000 ? 'open' : 'closed' })));
+      }
+      setTerminalLogs((prev) => [...prev, { type: 'ok', text: 'Port connectivity scan completed.' }]);
+    } catch (err: any) {
+      setTerminalLogs((prev) => [...prev, { type: 'err', text: `Port scan error: ${err.message}` }]);
+    } finally {
+      setIsScanningPorts(false);
+    }
+  };
+
+  // Add Continual Lesson
+  const handleAddLesson = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newLessonInput.trim()) return;
+    setContinualLessons((prev) => [...prev, newLessonInput.trim()]);
+    setNewLessonInput('');
+    setTerminalLogs((prev) => [...prev, { type: 'ok', text: 'Recorded new lesson to Continual Memory Harness.' }]);
   };
 
   // Helper for file type icon
@@ -476,7 +659,18 @@ fn main() {
 
         {/* Center Live Telemetry Status Pill */}
         <div className="hidden md:flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-950/80 border border-slate-800 text-[11px]">
+          <button
+            onClick={() => setIsCommandPaletteOpen(true)}
+            className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-400 hover:text-white transition-all font-mono"
+            title="Open Command Palette (Ctrl+K or Ctrl+Shift+P)"
+            style={{ WebkitAppRegion: 'no-drag' } as any}
+          >
+            <Command className="w-3 h-3 text-cyan-400" />
+            <span>Command Palette</span>
+            <span className="px-1.5 py-0.2 rounded bg-black text-[9px] text-slate-500">Ctrl+K</span>
+          </button>
+          
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950/80 border border-slate-800 text-[11px]">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-emerald-300 font-medium font-mono">PRIME RLM READY</span>
           </div>
@@ -532,7 +726,7 @@ fn main() {
       <div className="flex-1 flex overflow-hidden">
         
         {/* Far-Left Activity Bar (VS Code / Linear style) */}
-        <nav className="w-12 bg-[#03050c] border-r border-indigo-950/60 flex flex-col justify-between items-center py-3 select-none flex-shrink-0">
+        <nav className="w-12 bg-[#03050c] border-r border-indigo-950/60 flex flex-col justify-between items-center py-3 select-none flex-shrink-0 z-20">
           <div className="flex flex-col gap-3">
             <button
               onClick={() => setActiveSidebarView('explorer')}
@@ -590,6 +784,13 @@ fn main() {
 
           <div className="flex flex-col gap-2 items-center">
             <button
+              onClick={() => setIsCommandPaletteOpen(true)}
+              title="Command Palette (Ctrl+K)"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-cyan-300 hover:bg-slate-900/40 transition-colors"
+            >
+              <Command className="w-4 h-4" />
+            </button>
+            <button
               onClick={handleOpenLocalDirectory}
               title="Open Folder on Disk"
               className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-cyan-300 hover:bg-slate-900/40 transition-colors"
@@ -604,18 +805,40 @@ fn main() {
           <div className="flex-1 flex flex-col overflow-hidden">
             
             {/* Explorer Header */}
-            <div className="p-3 border-b border-indigo-950/60 flex justify-between items-center bg-[#050816]">
+            <div className="p-2.5 border-b border-indigo-950/60 flex justify-between items-center bg-[#050816]">
               <span className="text-[11px] font-mono font-bold tracking-wider text-slate-400 uppercase">
                 EXPLORER
               </span>
-              <button
-                onClick={handleOpenLocalDirectory}
-                className="px-2.5 py-1 bg-indigo-950/60 hover:bg-indigo-900/50 border border-indigo-800/40 rounded-lg text-[10px] font-mono text-cyan-300 hover:text-white transition-all flex items-center gap-1.5"
-                title="Open real local folder on your computer"
-              >
-                <FolderOpen className="w-3 h-3" />
-                <span>Open Folder</span>
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setIsNewFileModalOpen(true)}
+                  className="p-1 hover:bg-indigo-950/80 rounded text-slate-400 hover:text-cyan-300 transition-colors"
+                  title="New File"
+                >
+                  <FilePlus className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setIsNewFolderModalOpen(true)}
+                  className="p-1 hover:bg-indigo-950/80 rounded text-slate-400 hover:text-cyan-300 transition-colors"
+                  title="New Folder"
+                >
+                  <FolderPlus className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={handleRefreshTree}
+                  className="p-1 hover:bg-indigo-950/80 rounded text-slate-400 hover:text-cyan-300 transition-colors"
+                  title="Refresh File Tree"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={handleOpenLocalDirectory}
+                  className="p-1 hover:bg-indigo-950/80 rounded text-slate-400 hover:text-cyan-300 transition-colors"
+                  title="Open Directory from Disk"
+                >
+                  <FolderOpen className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
 
             {/* Quick Filter Search */}
@@ -639,14 +862,23 @@ fn main() {
                   <div
                     key={idx}
                     onClick={() => handleSelectFile(item)}
-                    className={`px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors flex items-center gap-2 ${
+                    className={`px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors flex items-center justify-between group ${
                       activeFile === item.name
                         ? 'bg-indigo-950/80 text-cyan-300 border-l-2 border-cyan-400 font-semibold'
                         : 'text-slate-400 hover:bg-slate-900/60 hover:text-slate-200'
                     }`}
                   >
-                    {item.isDirectory ? <Folder className="w-3.5 h-3.5 text-indigo-400" /> : getFileIcon(item.name)}
-                    <span className="truncate">{item.name}</span>
+                    <div className="flex items-center gap-2 truncate">
+                      {item.isDirectory ? <Folder className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" /> : getFileIcon(item.name)}
+                      <span className="truncate">{item.name}</span>
+                    </div>
+                    <button
+                      onClick={(e) => handleDeleteFile(item, e)}
+                      title="Delete file"
+                      className="opacity-0 group-hover:opacity-100 hover:text-rose-400 transition-opacity p-0.5 rounded"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
                   </div>
                 ))
               ) : (
@@ -656,14 +888,26 @@ fn main() {
                     <div
                       key={fileName}
                       onClick={() => setActiveFile(fileName)}
-                      className={`px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors flex items-center gap-2 ${
+                      className={`px-2.5 py-1.5 rounded-lg cursor-pointer transition-colors flex items-center justify-between group ${
                         activeFile === fileName
                           ? 'bg-indigo-950/80 text-cyan-300 border-l-2 border-cyan-400 font-semibold'
                           : 'text-slate-400 hover:bg-slate-900/60 hover:text-slate-200'
                       }`}
                     >
-                      {getFileIcon(fileName)}
-                      <span className="truncate">{fileName}</span>
+                      <div className="flex items-center gap-2 truncate">
+                        {getFileIcon(fileName)}
+                        <span className="truncate">{fileName}</span>
+                        {dirtyFiles.has(fileName) && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                        )}
+                      </div>
+                      <button
+                        onClick={(e) => handleDeleteFile({ id: fileName, name: fileName, path: fileName, isDirectory: false }, e)}
+                        title="Delete file"
+                        className="opacity-0 group-hover:opacity-100 hover:text-rose-400 transition-opacity p-0.5 rounded"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
                     </div>
                   ))
               )}
@@ -703,6 +947,9 @@ fn main() {
                 >
                   {getFileIcon(tab)}
                   <span>{tab}</span>
+                  {dirtyFiles.has(tab) && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  )}
                   {tab === activeFile && (
                     <span
                       onClick={(e) => {
@@ -720,6 +967,13 @@ fn main() {
                   )}
                 </div>
               ))}
+              <button
+                onClick={() => setIsNewFileModalOpen(true)}
+                title="New File Buffer"
+                className="p-1 text-slate-500 hover:text-slate-300 rounded"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
             </div>
 
             {/* Language Picker & Execution Actions */}
@@ -776,45 +1030,52 @@ fn main() {
                   className="px-3 py-1 bg-rose-950/80 hover:bg-rose-900 border border-rose-500/50 text-rose-300 rounded-lg text-xs font-mono font-bold animate-pulse transition-all flex items-center gap-1.5"
                   title="Prime Agent Autonomous Self-Healing"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-rose-400" />
+                  <Wand2 className="w-3.5 h-3.5 text-rose-400" />
                   <span>Auto-Heal</span>
                 </button>
               )}
             </div>
           </div>
 
-          {/* Code Editor Body */}
+          {/* Code Editor Body — Monaco Professional Editor */}
           <div className="flex-1 relative flex overflow-hidden">
-            {/* Line numbers column */}
-            <div className="w-12 bg-[#030612] text-slate-600 font-mono text-xs text-right pr-3 pt-4 select-none border-r border-indigo-950/30">
-              {(fileContents[activeFile] || '').split('\n').map((_, i) => (
-                <div key={i} className="leading-6">{i + 1}</div>
-              ))}
-            </div>
-
-            {/* Code text area */}
-            <textarea
+            <MonacoEditor
+              height="100%"
+              language={selectedLanguage}
+              theme="vs-dark"
               value={fileContents[activeFile] || ''}
-              onChange={(e) => {
-                const val = e.target.value;
+              onChange={(value) => {
+                const val = value || '';
                 setFileContents((prev) => ({ ...prev, [activeFile]: val }));
+                setDirtyFiles((prev) => new Set(prev).add(activeFile));
               }}
-              spellCheck={false}
-              className="flex-1 bg-transparent text-emerald-400 font-mono text-xs p-4 leading-6 resize-none outline-none overflow-y-auto selection:bg-indigo-900/50 selection:text-white"
+              options={{
+                fontSize: 13,
+                fontFamily: 'JetBrains Mono, Fira Code, monospace',
+                lineNumbers: 'on',
+                minimap: { enabled: true },
+                scrollBeyondLastLine: false,
+                smoothScrolling: true,
+                cursorBlinking: 'smooth',
+                renderLineHighlight: 'all',
+                bracketPairColorization: { enabled: true },
+                automaticLayout: true,
+                tabSize: 2,
+              }}
             />
           </div>
 
           {/* Bottom Dock: Multi-Mode Cybernetic Console */}
-          <div className="h-60 bg-[#02050f] border-t border-indigo-950/60 flex flex-col overflow-hidden">
+          <div className="h-64 bg-[#02050f] border-t border-indigo-950/60 flex flex-col overflow-hidden z-10">
             
             {/* Dock Tab Selector */}
             <div className="h-9 bg-[#040715] border-b border-indigo-950/50 px-3 flex justify-between items-center text-xs font-mono">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveTab('editor')}
-                  className={`py-1 px-2 rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
+                  className={`py-1 px-2.5 rounded-lg cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeTab === 'editor'
-                      ? 'text-cyan-300 font-bold bg-indigo-950/60 border border-indigo-800/40'
+                      ? 'text-cyan-300 font-bold bg-indigo-950/80 border border-indigo-800/50'
                       : 'text-slate-500 hover:text-slate-300'
                   }`}
                 >
@@ -823,9 +1084,9 @@ fn main() {
                 </button>
                 <button
                   onClick={() => setActiveTab('prime')}
-                  className={`py-1 px-2 rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
+                  className={`py-1 px-2.5 rounded-lg cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeTab === 'prime'
-                      ? 'text-cyan-300 font-bold bg-indigo-950/60 border border-indigo-800/40'
+                      ? 'text-cyan-300 font-bold bg-indigo-950/80 border border-indigo-800/50'
                       : 'text-slate-500 hover:text-slate-300'
                   }`}
                 >
@@ -835,9 +1096,9 @@ fn main() {
                 </button>
                 <button
                   onClick={() => setActiveTab('repl')}
-                  className={`py-1 px-2 rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
+                  className={`py-1 px-2.5 rounded-lg cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeTab === 'repl'
-                      ? 'text-cyan-300 font-bold bg-indigo-950/60 border border-indigo-800/40'
+                      ? 'text-cyan-300 font-bold bg-indigo-950/80 border border-indigo-800/50'
                       : 'text-slate-500 hover:text-slate-300'
                   }`}
                 >
@@ -846,9 +1107,9 @@ fn main() {
                 </button>
                 <button
                   onClick={() => setActiveTab('host')}
-                  className={`py-1 px-2 rounded cursor-pointer transition-colors flex items-center gap-1.5 ${
+                  className={`py-1 px-2.5 rounded-lg cursor-pointer transition-colors flex items-center gap-1.5 ${
                     activeTab === 'host'
-                      ? 'text-cyan-300 font-bold bg-indigo-950/60 border border-indigo-800/40'
+                      ? 'text-cyan-300 font-bold bg-indigo-950/80 border border-indigo-800/50'
                       : 'text-slate-500 hover:text-slate-300'
                   }`}
                 >
@@ -859,6 +1120,17 @@ fn main() {
 
               {/* Utility buttons for dock */}
               <div className="flex items-center gap-2 text-slate-500">
+                <button
+                  onClick={() => {
+                    const text = terminalLogs.map((l) => l.text).join('\n');
+                    navigator.clipboard.writeText(text);
+                    setTerminalLogs((prev) => [...prev, { type: 'ok', text: 'Copied terminal logs to clipboard.' }]);
+                  }}
+                  title="Copy Console Output"
+                  className="p-1 hover:text-slate-300 hover:bg-slate-900 rounded"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                </button>
                 <button
                   onClick={() => setTerminalLogs([])}
                   title="Clear Output"
@@ -918,7 +1190,7 @@ fn main() {
               {/* Tab 2: Prime Agent Autonomous HUD */}
               {activeTab === 'prime' && (
                 <div className="flex flex-col h-full justify-between">
-                  <div className="flex-1 overflow-y-auto space-y-2 mb-2">
+                  <div className="flex-1 overflow-y-auto space-y-2.5 mb-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-cyan-400 font-bold">PRIME AGENT RLM HARNESS</span>
@@ -936,14 +1208,14 @@ fn main() {
                     )}
 
                     {suggestedPatch && (
-                      <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/40 flex justify-between items-center">
+                      <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 flex justify-between items-center shadow-lg">
                         <div className="flex items-center gap-2">
                           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                           <span className="text-emerald-300">Autonomous self-healed patch ready for {activeFile}.</span>
                         </div>
                         <button
                           onClick={handleApplyPatch}
-                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold transition-all shadow-md active:scale-[0.98]"
+                          className="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white rounded-lg font-bold text-xs transition-all shadow-md active:scale-[0.98]"
                         >
                           Apply Patch to Editor
                         </button>
@@ -967,7 +1239,7 @@ fn main() {
                       <button
                         onClick={() => handlePrimeExecute()}
                         disabled={isPrimeThinking}
-                        className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white rounded-lg font-bold text-xs"
+                        className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white rounded-lg font-bold text-xs transition-all active:scale-[0.98]"
                       >
                         {isPrimeThinking ? 'Thinking...' : 'Instruct'}
                       </button>
@@ -975,13 +1247,19 @@ fn main() {
                         onClick={() => handlePrimeExecute('Optimize performance and reduce memory allocations')}
                         className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-cyan-300 rounded-lg text-xs"
                       >
-                        Optimize
+                        ⚡ Optimize
                       </button>
                       <button
                         onClick={() => handlePrimeExecute('Generate comprehensive test suite')}
                         className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-emerald-300 rounded-lg text-xs"
                       >
-                        Gen Tests
+                        🧪 Gen Tests
+                      </button>
+                      <button
+                        onClick={() => handlePrimeExecute('Run deep security audit for race conditions and buffer boundaries')}
+                        className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-amber-300 rounded-lg text-xs"
+                      >
+                        🛡️ Security
                       </button>
                     </div>
                   </div>
@@ -1005,7 +1283,25 @@ fn main() {
                       type="text"
                       value={replInput}
                       onChange={(e) => setReplInput(e.target.value)}
-                      placeholder="Execute Python / RLM statement in persistent kernel..."
+                      onKeyDown={(e) => {
+                        if (e.key === 'ArrowUp' && replHistory.length > 0) {
+                          e.preventDefault();
+                          const nextIdx = replHistoryIndex === -1 ? replHistory.length - 1 : Math.max(0, replHistoryIndex - 1);
+                          setReplHistoryIndex(nextIdx);
+                          setReplInput(replHistory[nextIdx]);
+                        } else if (e.key === 'ArrowDown' && replHistoryIndex !== -1) {
+                          e.preventDefault();
+                          const nextIdx = replHistoryIndex + 1;
+                          if (nextIdx >= replHistory.length) {
+                            setReplHistoryIndex(-1);
+                            setReplInput('');
+                          } else {
+                            setReplHistoryIndex(nextIdx);
+                            setReplInput(replHistory[nextIdx]);
+                          }
+                        }
+                      }}
+                      placeholder="Execute Python / RLM statement (e.g. 2**32, import sys; sys.version)..."
                       className="flex-1 bg-[#030614] border border-indigo-950/80 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400"
                     />
                   </form>
@@ -1034,12 +1330,21 @@ fn main() {
                       <span className="text-[10px] text-slate-500">Host: {hostStats?.hostname || 'LOCAL'}</span>
                     </div>
                     <div className="p-3 bg-[#030614] border border-indigo-950/80 rounded-xl">
-                      <span className="text-slate-500 text-[10px]">PORT SCANNER</span>
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-500 text-[10px]">PORT SCANNER</span>
+                        <button
+                          onClick={handleScanPorts}
+                          disabled={isScanningPorts}
+                          className="text-[9px] text-cyan-400 hover:text-cyan-300 font-mono"
+                        >
+                          {isScanningPorts ? 'Scanning...' : 'Scan Now'}
+                        </button>
+                      </div>
                       <div className="flex gap-1.5 mt-1.5 flex-wrap">
                         {scannedPorts.map((p) => (
                           <span
                             key={p.port}
-                            className={`px-1.5 py-0.5 rounded text-[10px] ${
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
                               p.status === 'open' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-slate-900 text-slate-600'
                             }`}
                           >
@@ -1053,7 +1358,10 @@ fn main() {
                   {/* Top Processes Table */}
                   {hostStats?.topProcesses && (
                     <div>
-                      <div className="text-slate-400 font-bold mb-2 text-xs">RUNNING OS PROCESSES ({hostStats.topProcesses.length})</div>
+                      <div className="text-slate-400 font-bold mb-2 text-xs flex justify-between items-center">
+                        <span>RUNNING OS PROCESSES ({hostStats.topProcesses.length})</span>
+                        <span className="text-[10px] font-normal text-slate-500">Native Process Control Active</span>
+                      </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-slate-400 font-mono">
                         {hostStats.topProcesses.slice(0, 8).map((proc) => (
                           <div key={proc.pid} className="p-2 bg-[#030614] border border-indigo-950/80 rounded-lg flex justify-between items-center">
@@ -1063,7 +1371,7 @@ fn main() {
                             </div>
                             <button
                               onClick={() => handleKillProcess(proc.pid)}
-                              className="px-1.5 py-0.5 bg-rose-950/80 hover:bg-rose-900 text-rose-300 rounded text-[10px]"
+                              className="px-1.5 py-0.5 bg-rose-950/80 hover:bg-rose-900 text-rose-300 rounded text-[10px] transition-colors"
                             >
                               Kill
                             </button>
@@ -1095,6 +1403,17 @@ fn main() {
                   </div>
                 ))}
               </div>
+              
+              {/* Add lesson input */}
+              <form onSubmit={handleAddLesson} className="mt-3">
+                <input
+                  type="text"
+                  placeholder="+ Add verified lesson..."
+                  value={newLessonInput}
+                  onChange={(e) => setNewLessonInput(e.target.value)}
+                  className="w-full bg-[#02050f] border border-indigo-950/80 rounded-lg px-2.5 py-1 text-[11px] text-slate-300 placeholder-slate-600 focus:outline-none focus:border-cyan-400"
+                />
+              </form>
             </div>
 
             <div className="border-t border-indigo-950/60 pt-3">
@@ -1108,21 +1427,21 @@ fn main() {
                     <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                     <span className="text-white font-medium">Prime RLM Core</span>
                   </div>
-                  <span className="text-[10px] text-emerald-400">ACTIVE</span>
+                  <span className="text-[10px] text-emerald-400 font-semibold">ACTIVE</span>
                 </div>
                 <div className="p-2 rounded-lg bg-[#02050f] border border-indigo-950/80 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400" />
                     <span className="text-white font-medium">Host Sentry</span>
                   </div>
-                  <span className="text-[10px] text-cyan-400">STREAMING</span>
+                  <span className="text-[10px] text-cyan-400 font-semibold">STREAMING</span>
                 </div>
                 <div className="p-2 rounded-lg bg-[#02050f] border border-indigo-950/80 flex items-center justify-between opacity-60">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-slate-600" />
                     <span className="text-slate-400">Yjs Peer Mesh</span>
                   </div>
-                  <span className="text-[10px] text-slate-500">STANDBY</span>
+                  <span className="text-[10px] text-slate-500 font-semibold">STANDBY</span>
                 </div>
               </div>
             </div>
@@ -1134,6 +1453,135 @@ fn main() {
         </aside>
 
       </div>
+
+      {/* ================= COMMAND PALETTE MODAL ================= */}
+      {isCommandPaletteOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-start justify-center pt-24 px-4">
+          <div className="w-full max-w-xl liquid-glass-elevated rounded-2xl border border-cyan-500/30 overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-3 border-b border-indigo-950/80 flex items-center gap-3 bg-[#030614]">
+              <Search className="w-4 h-4 text-cyan-400" />
+              <input
+                type="text"
+                autoFocus
+                placeholder="Type a command or search action (e.g., 'Run', 'Heal', 'Save', 'Test')..."
+                value={commandPaletteQuery}
+                onChange={(e) => setCommandPaletteQuery(e.target.value)}
+                className="w-full bg-transparent text-sm font-mono text-white placeholder-slate-500 outline-none"
+              />
+              <span className="text-[10px] font-mono text-slate-500 border border-slate-800 px-1.5 py-0.5 rounded">ESC</span>
+            </div>
+
+            <div className="p-2 max-h-80 overflow-y-auto space-y-1 font-mono text-xs">
+              {[
+                { label: 'Compile & Run Active Code', icon: Play, action: () => { handleRunCode(); setIsCommandPaletteOpen(false); }, shortcut: 'Ctrl+Enter' },
+                { label: 'Prime Agent: Autonomous Self-Healing', icon: Wand2, action: () => { handlePrimeAutoHeal(); setIsCommandPaletteOpen(false); } },
+                { label: 'Prime Agent: Optimize Performance', icon: Zap, action: () => { handlePrimeExecute('Optimize performance and reduce memory allocations'); setIsCommandPaletteOpen(false); } },
+                { label: 'Prime Agent: Generate Test Suite', icon: Sparkles, action: () => { handlePrimeExecute('Generate comprehensive test suite'); setIsCommandPaletteOpen(false); } },
+                { label: 'Save Active File to Disk', icon: Save, action: () => { handleSaveActiveFile(); setIsCommandPaletteOpen(false); }, shortcut: 'Ctrl+S' },
+                { label: 'Open Native Workspace Folder', icon: FolderOpen, action: () => { handleOpenLocalDirectory(); setIsCommandPaletteOpen(false); } },
+                { label: 'Create New File Buffer', icon: FilePlus, action: () => { setIsNewFileModalOpen(true); setIsCommandPaletteOpen(false); } },
+                { label: 'Create New Directory Folder', icon: FolderPlus, action: () => { setIsNewFolderModalOpen(true); setIsCommandPaletteOpen(false); } },
+                { label: 'Run Port Connectivity Scan', icon: Activity, action: () => { handleScanPorts(); setIsCommandPaletteOpen(false); } },
+                { label: 'Clear Shell Output Logs', icon: Trash2, action: () => { setTerminalLogs([]); setIsCommandPaletteOpen(false); } },
+              ]
+                .filter((cmd) => cmd.label.toLowerCase().includes(commandPaletteQuery.toLowerCase()))
+                .map((cmd, idx) => {
+                  const Icon = cmd.icon;
+                  return (
+                    <div
+                      key={idx}
+                      onClick={cmd.action}
+                      className="px-3 py-2.5 rounded-lg hover:bg-indigo-950/70 cursor-pointer flex items-center justify-between text-slate-300 hover:text-white transition-colors"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Icon className="w-4 h-4 text-cyan-400" />
+                        <span>{cmd.label}</span>
+                      </div>
+                      {cmd.shortcut && (
+                        <span className="text-[10px] text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+                          {cmd.shortcut}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= NEW FILE MODAL ================= */}
+      {isNewFileModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+          <div className="w-full max-w-sm liquid-glass-elevated rounded-2xl border border-indigo-500/30 p-5 shadow-2xl">
+            <h3 className="text-sm font-bold text-white mb-2 font-sans flex items-center gap-2">
+              <FilePlus className="w-4 h-4 text-cyan-400" />
+              <span>Create New File</span>
+            </h3>
+            <p className="text-xs text-slate-400 mb-3 font-mono">Enter filename with extension (e.g., worker.ts, app.py):</p>
+            <input
+              type="text"
+              autoFocus
+              value={newFileNameInput}
+              onChange={(e) => setNewFileNameInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreateFile()}
+              placeholder="e.g. telemetry.py"
+              className="w-full bg-[#02040b] border border-indigo-950/80 rounded-lg px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyan-400 mb-4"
+            />
+            <div className="flex justify-end gap-2 text-xs font-mono">
+              <button
+                onClick={() => setIsNewFileModalOpen(false)}
+                className="px-3 py-1.5 rounded bg-slate-900 text-slate-400 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateFile}
+                className="px-4 py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-bold"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= NEW FOLDER MODAL ================= */}
+      {isNewFolderModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+          <div className="w-full max-w-sm liquid-glass-elevated rounded-2xl border border-indigo-500/30 p-5 shadow-2xl">
+            <h3 className="text-sm font-bold text-white mb-2 font-sans flex items-center gap-2">
+              <FolderPlus className="w-4 h-4 text-cyan-400" />
+              <span>Create New Folder</span>
+            </h3>
+            <p className="text-xs text-slate-400 mb-3 font-mono">Enter folder name:</p>
+            <input
+              type="text"
+              autoFocus
+              value={newFolderNameInput}
+              onChange={(e) => setNewFolderNameInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
+              placeholder="e.g. services"
+              className="w-full bg-[#02040b] border border-indigo-950/80 rounded-lg px-3 py-2 text-xs font-mono text-white outline-none focus:border-cyan-400 mb-4"
+            />
+            <div className="flex justify-end gap-2 text-xs font-mono">
+              <button
+                onClick={() => setIsNewFolderModalOpen(false)}
+                className="px-3 py-1.5 rounded bg-slate-900 text-slate-400 hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateFolder}
+                className="px-4 py-1.5 rounded bg-cyan-600 hover:bg-cyan-500 text-white font-bold"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
