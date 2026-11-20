@@ -9,49 +9,33 @@ export default {
     extend: {
       colors: {
         synapse: {
-          bg: '#040711',
-          surface: '#070b19',
-          elevated: '#0d1326',
-          card: '#0a0f22',
-          border: 'rgba(99, 102, 241, 0.18)',
-          accent: '#6366f1',
-          cyan: '#06b6d4',
+          bg: '#0c0d0e',
+          surface: '#121316',
+          elevated: '#17191e',
+          card: '#14151a',
+          border: 'rgba(255, 255, 255, 0.07)',
+          borderStrong: 'rgba(255, 255, 255, 0.12)',
+          accent: '#f59e0b',
+          accentHover: '#d97706',
+          accentMuted: 'rgba(245, 158, 11, 0.08)',
+          accentBorder: 'rgba(245, 158, 11, 0.25)',
           emerald: '#10b981',
+          rose: '#ef4444',
           amber: '#f59e0b',
-          rose: '#f43f5e',
+          muted: '#8a8f98',
+          subtle: '#5c6068',
         },
       },
       fontFamily: {
-        sans: ['Outfit', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       boxShadow: {
-        'glow-indigo': '0 0 25px -5px rgba(99, 102, 241, 0.4)',
-        'glow-cyan': '0 0 25px -5px rgba(6, 182, 212, 0.4)',
-        'glow-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.4)',
-        'glass-inner': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.09)',
-        'glass-inset': 'inset 0 0 12px rgba(0, 0, 0, 0.6)',
-      },
-      keyframes: {
-        pulseSlow: {
-          '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
-          '50%': { opacity: '0.8', transform: 'scale(1.04)' },
-        },
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
-        },
-        beamScan: {
-          '0%': { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(100%)' },
-        },
-      },
-      animation: {
-        'pulse-slow': 'pulseSlow 4s ease-in-out infinite',
-        'shimmer': 'shimmer 2.5s linear infinite',
-        'beam': 'beamScan 6s linear infinite',
+        'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.35)',
+        'elevated': '0 12px 30px -10px rgba(0, 0, 0, 0.65), 0 4px 10px -2px rgba(0, 0, 0, 0.4)',
+        'modal': '0 24px 60px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08)',
       },
     },
   },
   plugins: [],
-}
+};

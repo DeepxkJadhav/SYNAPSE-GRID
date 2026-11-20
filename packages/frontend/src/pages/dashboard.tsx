@@ -13,12 +13,7 @@ import {
   LogOut,
   Terminal,
   AlertCircle,
-  KeyRound,
-  Sparkles,
-  Cpu,
   Clock,
-  ShieldCheck,
-  FolderOpen,
 } from 'lucide-react';
 
 interface Session {
@@ -104,42 +99,40 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#040711] cyber-grid relative overflow-x-hidden flex flex-col justify-between">
-      {/* Ambient Lighting */}
-      <div className="absolute top-[-100px] left-1/4 w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-[140px] pointer-events-none" />
-
+    <div className="min-h-[100dvh] bg-[#0c0d0e] relative overflow-x-hidden flex flex-col justify-between text-zinc-100">
+      
       {/* Navigation */}
-      <nav className="bg-[#040711]/80 border-b border-indigo-950/60 backdrop-blur-xl sticky top-0 z-50">
+      <nav className="bg-[#121316] border-b border-white/[0.07] backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-600/30 border border-white/20">
-              <Code2 className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-md bg-zinc-800 border border-zinc-700/80 flex items-center justify-center font-bold text-amber-400">
+              <Code2 className="w-4 h-4 text-amber-400" />
             </div>
-            <span className="font-bold text-lg tracking-tight text-white font-sans flex items-center gap-1.5">
-              SYNAPSE<span className="text-cyan-400 font-light">GRID</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-400">
+            <span className="font-semibold text-base tracking-tight text-white font-sans flex items-center gap-1.5">
+              SYNAPSE<span className="text-amber-400 font-normal">GRID</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-750 text-zinc-400">
                 CONTROL CENTER
               </span>
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/editor/session-desktop"
-              className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-indigo-950/60 border border-indigo-500/30 text-cyan-300 hover:text-white text-xs font-mono transition-all"
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-mono transition-all"
             >
-              <Zap className="w-3.5 h-3.5 text-cyan-400" />
+              <Zap className="w-3.5 h-3.5 text-amber-400" />
               <span>Direct Workstation</span>
             </Link>
 
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/60 border border-slate-800/80">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-medium text-slate-300 font-mono">{user?.username}</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-zinc-900 border border-zinc-800">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="text-xs font-medium text-zinc-300 font-mono">{user?.username}</span>
             </div>
 
             <button
               onClick={handleLogout}
-              className="px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-rose-300 border border-rose-950/60 bg-rose-950/20 rounded-xl hover:bg-rose-950/40 transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 text-xs font-mono uppercase tracking-wider text-rose-300 border border-rose-950/80 bg-rose-950/20 rounded-md hover:bg-rose-950/40 transition-colors flex items-center gap-1.5"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Disconnect</span>
@@ -153,29 +146,29 @@ export default function Dashboard() {
         
         {/* Error notification banner */}
         {error && (
-          <div className="p-4 mb-6 text-xs font-mono text-rose-300 bg-rose-950/40 border border-rose-500/30 rounded-xl flex items-center gap-2.5">
+          <div className="p-4 mb-6 text-xs font-mono text-rose-300 bg-rose-950/40 border border-rose-500/30 rounded-md flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Quick Launch Banner for Local Desktop IDE */}
-        <div className="liquid-glass-elevated p-6 rounded-2xl mb-8 border border-indigo-500/25 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="bg-[#121316] p-6 rounded-xl mb-8 border border-white/[0.08] shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950/80 text-cyan-400 border border-cyan-800/40">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-800 text-amber-400 border border-zinc-700/60">
                 LOCAL STANDALONE ENGINE
               </span>
-              <span className="text-xs text-slate-400 font-mono">Offline Native IPC Active</span>
+              <span className="text-xs text-zinc-500 font-mono">Offline Native IPC Active</span>
             </div>
-            <h2 className="text-xl font-bold text-white font-sans">Cybernetic Desktop Workstation</h2>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-xl">
+            <h2 className="text-lg font-semibold text-white font-sans">Cybernetic Desktop Workstation</h2>
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-xl">
               Open your local source folders, compile multi-language code, inspect hardware telemetry, and execute Prime Agent RLM healing loops.
             </p>
           </div>
           <Link
             href="/editor/session-desktop"
-            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-cyan-500 text-white rounded-xl font-semibold text-xs uppercase tracking-wider font-mono hover:from-indigo-500 hover:to-cyan-400 transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2 active:scale-[0.98] flex-shrink-0"
+            className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-md font-semibold text-xs uppercase tracking-wider font-mono transition-all flex items-center gap-2 active:scale-[0.98] flex-shrink-0"
           >
             <Zap className="w-4 h-4 fill-current" />
             <span>Open Workstation</span>
@@ -187,32 +180,32 @@ export default function Dashboard() {
         <div className="grid md:grid-cols-2 gap-6">
           
           {/* Create Session Card */}
-          <div className="liquid-glass p-7 rounded-2xl border border-indigo-950/80">
+          <div className="bg-[#121316] p-6 rounded-xl border border-white/[0.08]">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+              <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-300">
                 <PlusCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white font-sans">Initialize Cloud Workspace</h3>
-                <p className="text-xs text-slate-400 font-sans">Create a new collaborative Yjs mesh node</p>
+                <h3 className="text-base font-semibold text-white font-sans">Initialize Cloud Workspace</h3>
+                <p className="text-xs text-zinc-500 font-sans">Create a new collaborative Yjs mesh node</p>
               </div>
             </div>
             <form onSubmit={handleCreateSession} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-1.5">Session Name</label>
+                <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-1.5">Session Name</label>
                 <input
                   type="text"
                   placeholder="e.g. neuro-compiler-core"
                   value={newSessionName}
                   onChange={(e) => setNewSessionName(e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-[#02050f]/80 border border-indigo-950/80 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-400 text-xs font-mono"
+                  className="w-full px-4 py-2.5 bg-[#0e0f12] border border-zinc-800 rounded-md text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400 text-xs font-mono"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl font-mono text-xs uppercase tracking-wider font-bold transition-all shadow-md shadow-indigo-600/20 disabled:opacity-50"
+                className="w-full py-2.5 text-black bg-amber-500 hover:bg-amber-400 rounded-md font-mono text-xs uppercase tracking-wider font-semibold transition-all shadow-sm disabled:opacity-50"
               >
                 {loading ? 'Initializing Mesh...' : 'Create Mesh Session'}
               </button>
@@ -220,32 +213,32 @@ export default function Dashboard() {
           </div>
 
           {/* Join Session Card */}
-          <div className="liquid-glass p-7 rounded-2xl border border-indigo-950/80">
+          <div className="bg-[#121316] p-6 rounded-xl border border-white/[0.08]">
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <div className="w-9 h-9 rounded-md bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-300">
                 <Radio className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white font-sans">Connect via Invite Token</h3>
-                <p className="text-xs text-slate-400 font-sans">Join an existing team development mesh</p>
+                <h3 className="text-base font-semibold text-white font-sans">Connect via Invite Token</h3>
+                <p className="text-xs text-zinc-500 font-sans">Join an existing team development mesh</p>
               </div>
             </div>
             <form onSubmit={handleJoinSession} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-1.5">Invite Token / Code</label>
+                <label className="block text-xs font-mono uppercase tracking-wider text-zinc-400 mb-1.5">Invite Token / Code</label>
                 <input
                   type="text"
                   placeholder="e.g. syn-83kx-2ldp"
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value)}
                   required
-                  className="w-full px-4 py-3 bg-[#02050f]/80 border border-indigo-950/80 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-400 text-xs font-mono"
+                  className="w-full px-4 py-2.5 bg-[#0e0f12] border border-zinc-800 rounded-md text-white placeholder-zinc-600 focus:outline-none focus:border-amber-400 text-xs font-mono"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 text-white bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 rounded-xl font-mono text-xs uppercase tracking-wider font-bold transition-all shadow-md shadow-cyan-600/20 disabled:opacity-50"
+                className="w-full py-2.5 text-zinc-200 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/70 rounded-md font-mono text-xs uppercase tracking-wider font-semibold transition-all shadow-sm disabled:opacity-50"
               >
                 {loading ? 'Connecting...' : 'Join Mesh Node'}
               </button>
@@ -258,48 +251,48 @@ export default function Dashboard() {
         <div className="mt-12">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-cyan-400" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-200 font-mono">Active Sandbox Sessions</h3>
+              <Layers className="w-4 h-4 text-amber-400" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-200 font-mono">Active Sandbox Sessions</h3>
             </div>
-            <span className="text-xs text-slate-500 font-mono">TOTAL: {sessions.length} NODES</span>
+            <span className="text-xs text-zinc-500 font-mono">TOTAL: {sessions.length} NODES</span>
           </div>
 
           {sessions.length === 0 ? (
-            <div className="text-center p-12 liquid-glass rounded-2xl border border-indigo-950/60">
-              <div className="w-12 h-12 mx-auto rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4">
-                <Terminal className="w-6 h-6" />
+            <div className="text-center p-12 bg-[#121316] rounded-xl border border-white/[0.07]">
+              <div className="w-10 h-10 mx-auto rounded-md bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-400 mb-4">
+                <Terminal className="w-5 h-5" />
               </div>
-              <p className="text-sm font-medium text-slate-300 font-sans">No cloud mesh sessions active yet.</p>
-              <p className="text-xs text-slate-500 mt-1.5 font-mono max-w-md mx-auto">
+              <p className="text-sm font-medium text-zinc-300 font-sans">No cloud mesh sessions active yet.</p>
+              <p className="text-xs text-zinc-500 mt-1.5 font-mono max-w-md mx-auto">
                 Create a session above or launch the standalone Workstation directly to start coding offline with Prime Agent.
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {sessions.map((session) => (
                 <Link
                   key={session.id}
                   href={`/editor/${session.id}`}
-                  className="liquid-glass liquid-glass-interactive p-6 rounded-2xl block relative overflow-hidden group border border-indigo-950/80"
+                  className="bg-[#121316] p-5 rounded-xl block relative overflow-hidden group border border-white/[0.07] hover:border-zinc-600 transition-colors"
                 >
                   <div className="flex justify-between items-start mb-3">
-                    <h4 className="font-bold text-white text-base group-hover:text-cyan-300 transition-colors font-sans truncate pr-2">
+                    <h4 className="font-semibold text-white text-sm group-hover:text-amber-400 transition-colors font-sans truncate pr-2">
                       {session.name}
                     </h4>
-                    <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
+                    <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 transition-colors flex-shrink-0" />
                   </div>
                   
                   <div className="flex gap-2 items-center mb-4">
-                    <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 rounded text-cyan-400 text-[10px] font-mono font-semibold uppercase">
+                    <span className="px-2 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-zinc-300 text-[10px] font-mono font-medium uppercase">
                       {session.role}
                     </span>
-                    <span className="text-[11px] text-slate-500 font-mono">
+                    <span className="text-[11px] text-zinc-500 font-mono">
                       ID: {session.id.slice(0, 8)}
                     </span>
                   </div>
 
-                  <div className="text-[11px] text-slate-500 border-t border-indigo-950/50 pt-3 mt-2 flex items-center gap-1.5 font-mono">
-                    <Clock className="w-3 h-3 text-slate-600" />
+                  <div className="text-[11px] text-zinc-500 border-t border-white/[0.05] pt-3 mt-2 flex items-center gap-1.5 font-mono">
+                    <Clock className="w-3 h-3 text-zinc-600" />
                     <span>Created {new Date(session.joinedAt).toLocaleDateString()}</span>
                   </div>
                 </Link>
@@ -311,7 +304,7 @@ export default function Dashboard() {
       </main>
 
       {/* Footer */}
-      <footer className="max-w-7xl mx-auto w-full px-6 py-6 border-t border-indigo-950/50 flex justify-between items-center text-xs font-mono text-slate-500">
+      <footer className="max-w-7xl mx-auto w-full px-6 py-6 border-t border-white/[0.07] flex justify-between items-center text-xs font-mono text-zinc-500">
         <span>SYNAPSEGRID CLOUD MESH</span>
         <span>STATUS: ONLINE</span>
       </footer>

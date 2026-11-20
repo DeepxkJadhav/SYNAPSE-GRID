@@ -210,7 +210,7 @@ const createWindow = async () => {
         minWidth: 1040,
         minHeight: 680,
         title: 'SynapseGrid - Cybernetic Workstation',
-        backgroundColor: '#040711',
+        backgroundColor: '#0c0d0e',
         show: false, // Show when ready-to-show for seamless loading
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
@@ -253,6 +253,108 @@ const createWindow = async () => {
     mainWindow.on('closed', () => {
         exports.mainWindow = mainWindow = null;
     });
+    // Automated Native Desktop Screenshot Capture Mode
+    if (process.env.SYNAPSE_CAPTURE_MODE === '1') {
+        const OUTPUT_DIR = path.join('C:', 'Users', 'deepa', '.gemini', 'antigravity', 'brain', 'b182917e-6a10-48bb-8ceb-854e7f09f10b', 'desktop_screenshots');
+        if (!fs.existsSync(OUTPUT_DIR)) {
+            fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+        }
+        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+        setTimeout(async () => {
+            try {
+                console.log('[Synapse Desktop Capture] Starting native screenshot capture sequence...');
+                const win = mainWindow;
+                if (!win)
+                    return;
+                const capturePart = async (filename, label) => {
+                    console.log(`[Synapse Desktop Capture] Capturing ${label} -> ${filename}...`);
+                    const image = await win.webContents.capturePage();
+                    const dest = path.join(OUTPUT_DIR, filename);
+                    fs.writeFileSync(dest, image.toPNG());
+                    console.log(`[Synapse Desktop Capture] Saved: ${dest} (${image.getSize().width}x${image.getSize().height})`);
+                };
+                await sleep(3500);
+                // 1. Part 1: Full Desktop Workstation
+                await capturePart('part_1_workstation_main.png', 'Part 1: Full Desktop Workstation');
+                // 2. Part 2: Command Palette (Ctrl+K)
+                await win.webContents.executeJavaScript(`
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
+        `);
+                await sleep(800);
+                await capturePart('part_2_command_palette.png', 'Part 2: Spotlight Command Palette');
+                // Close command palette
+                await win.webContents.executeJavaScript(`
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        `);
+                await sleep(500);
+                // 3. Part 3: Create New File Modal
+                await win.webContents.executeJavaScript(`(() => {
+          const newFileBtn = document.querySelector('button[title="New File"]');
+          if (newFileBtn) newFileBtn.click();
+        })()`);
+                await sleep(700);
+                await capturePart('part_3_create_new_file.png', 'Part 3: Native Create New File Modal');
+                // Close modal
+                await win.webContents.executeJavaScript(`(() => {
+          const cancelBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'Cancel');
+          if (cancelBtn) cancelBtn.click();
+        })()`);
+                await sleep(500);
+                // 4. Part 4: Create New Folder Modal
+                await win.webContents.executeJavaScript(`(() => {
+          const newFolderBtn = document.querySelector('button[title="New Folder"]');
+          if (newFolderBtn) newFolderBtn.click();
+        })()`);
+                await sleep(700);
+                await capturePart('part_4_create_new_folder.png', 'Part 4: Native Create New Folder Modal');
+                // Close modal
+                await win.webContents.executeJavaScript(`(() => {
+          const cancelBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'Cancel');
+          if (cancelBtn) cancelBtn.click();
+        })()`);
+                await sleep(500);
+                // 5. Part 5: Prime Agent RLM Studio
+                await win.webContents.executeJavaScript(`(() => {
+          const primeTabs = Array.from(document.querySelectorAll('button')).filter(b => b.textContent.includes('PRIME AGENT RLM'));
+          if (primeTabs.length > 0) primeTabs[0].click();
+        })()`);
+                await sleep(700);
+                await win.webContents.executeJavaScript(`(() => {
+          const optBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Optimize'));
+          if (optBtn) optBtn.click();
+        })()`);
+                await sleep(2200);
+                await capturePart('part_5_prime_agent_rlm.png', 'Part 5: Prime Agent RLM Studio');
+                // 6. Part 6: Python REPL Kernel
+                await win.webContents.executeJavaScript(`(() => {
+          const replTab = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('REPL KERNEL'));
+          if (replTab) replTab.click();
+        })()`);
+                await sleep(700);
+                await capturePart('part_6_python_repl.png', 'Part 6: Python REPL Kernel');
+                // 7. Part 7: Host Telemetry Radar & Active Port Scanner
+                await win.webContents.executeJavaScript(`(() => {
+          const hostTab = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('HOST RADAR'));
+          if (hostTab) hostTab.click();
+        })()`);
+                await sleep(700);
+                await win.webContents.executeJavaScript(`(() => {
+          const scanBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Scan Now'));
+          if (scanBtn) scanBtn.click();
+        })()`);
+                await sleep(1500);
+                await capturePart('part_7_host_radar_telemetry.png', 'Part 7: Host Telemetry Radar & Port Scanner');
+                console.log('[Synapse Desktop Capture] Complete! Exiting Electron...');
+                electron_1.app.quit();
+                process.exit(0);
+            }
+            catch (err) {
+                console.error('[Synapse Desktop Capture Error]', err.message);
+                electron_1.app.quit();
+                process.exit(1);
+            }
+        }, 1500);
+    }
 };
 // ============== BACKEND SERVER LIFECYCLE ==============
 const getBackendPath = () => {
