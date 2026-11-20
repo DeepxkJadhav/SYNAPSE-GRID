@@ -271,12 +271,15 @@ const createWindow = async () => {
                     const image = await win.webContents.capturePage();
                     const dest = path.join(OUTPUT_DIR, filename);
                     fs.writeFileSync(dest, image.toPNG());
+                    // Also copy to root artifact directory for instant viewing
+                    const rootDest = path.join(OUTPUT_DIR, '..', filename);
+                    fs.writeFileSync(rootDest, image.toPNG());
                     console.log(`[Synapse Desktop Capture] Saved: ${dest} (${image.getSize().width}x${image.getSize().height})`);
                 };
                 await sleep(3500);
-                // 1. Part 1: Full Desktop Workstation
+                // 1. Part 1: Full Desktop Workstation (File Explorer + Full-Width Editor + Terminal Dock)
                 await capturePart('part_1_workstation_main.png', 'Part 1: Full Desktop Workstation');
-                // 2. Part 2: Command Palette (Ctrl+K)
+                // 2. Part 2: Spotlight Command Palette (Ctrl+K)
                 await win.webContents.executeJavaScript(`
           window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
         `);
@@ -313,10 +316,12 @@ const createWindow = async () => {
           if (cancelBtn) cancelBtn.click();
         })()`);
                 await sleep(500);
-                // 5. Part 5: Prime Agent RLM Studio
+                // 5. Part 5: Prime Agent Studio (Left Sidebar + Bottom Dock)
                 await win.webContents.executeJavaScript(`(() => {
-          const primeTabs = Array.from(document.querySelectorAll('button')).filter(b => b.textContent.includes('PRIME AGENT RLM'));
-          if (primeTabs.length > 0) primeTabs[0].click();
+          const primeActivityBtn = document.querySelector('button[title="Prime Agent Studio"]');
+          if (primeActivityBtn) primeActivityBtn.click();
+          const primeDockTab = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Prime Agent'));
+          if (primeDockTab) primeDockTab.click();
         })()`);
                 await sleep(700);
                 await win.webContents.executeJavaScript(`(() => {
@@ -324,26 +329,35 @@ const createWindow = async () => {
           if (optBtn) optBtn.click();
         })()`);
                 await sleep(2200);
-                await capturePart('part_5_prime_agent_rlm.png', 'Part 5: Prime Agent RLM Studio');
+                await capturePart('part_5_prime_agent_rlm.png', 'Part 5: Prime Agent Studio');
                 // 6. Part 6: Python REPL Kernel
                 await win.webContents.executeJavaScript(`(() => {
-          const replTab = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('REPL KERNEL'));
+          const replTab = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Python REPL'));
           if (replTab) replTab.click();
         })()`);
                 await sleep(700);
                 await capturePart('part_6_python_repl.png', 'Part 6: Python REPL Kernel');
-                // 7. Part 7: Host Telemetry Radar & Active Port Scanner
+                // 7. Part 7: Hardware Telemetry Radar & Port Scanner
                 await win.webContents.executeJavaScript(`(() => {
-          const hostTab = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('HOST RADAR'));
+          const telemActivityBtn = document.querySelector('button[title="Hardware Telemetry"]');
+          if (telemActivityBtn) telemActivityBtn.click();
+          const hostTab = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Hardware Radar'));
           if (hostTab) hostTab.click();
         })()`);
                 await sleep(700);
                 await win.webContents.executeJavaScript(`(() => {
-          const scanBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Scan Now'));
+          const scanBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'Scan');
           if (scanBtn) scanBtn.click();
         })()`);
                 await sleep(1500);
-                await capturePart('part_7_host_radar_telemetry.png', 'Part 7: Host Telemetry Radar & Port Scanner');
+                await capturePart('part_7_host_radar_telemetry.png', 'Part 7: Hardware Telemetry Radar');
+                // 8. Part 8: Continual Memory & Swarm Presence
+                await win.webContents.executeJavaScript(`(() => {
+          const memoryActivityBtn = document.querySelector('button[title="Continual Memory & Swarm"]');
+          if (memoryActivityBtn) memoryActivityBtn.click();
+        })()`);
+                await sleep(800);
+                await capturePart('part_8_continual_memory_swarm.png', 'Part 8: Continual Memory & Swarm');
                 console.log('[Synapse Desktop Capture] Complete! Exiting Electron...');
                 electron_1.app.quit();
                 process.exit(0);
